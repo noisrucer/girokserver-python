@@ -1,0 +1,26 @@
+from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy.sql.sqltypes import TIMESTAMP, Boolean, DateTime
+from sqlalchemy.sql.expression import text
+
+from server.src.database import Base
+
+
+
+class Task(Base):
+    __tablename__ = "task"
+    
+    task_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_email = Column(String(100), ForeignKey("user.user_email"), nullable=False)
+    task_category_id = Column(Integer, ForeignKey('task_category.task_category_id'), nullable=True)
+    title = Column(String(300), nullable=False)
+    deadline = Column(DateTime, nullable=False)
+    importance = Column(Integer, nullable=True)
+    color = Column(String(20), nullable=True)
+    
+
+class TaskCategory(Base):
+    __tablename__ = "task_category"
+    task_category_id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False)
+    super_task_category_id = Column(Integer, ForeignKey('task_category.task_category_id'), nullable=True)
+    color = Column(String(20), nullable=True)
