@@ -2,7 +2,7 @@ from functools import lru_cache
 from dotenv import load_dotenv
 from pydantic import BaseSettings
 
-load_dotenv('server/.env')
+load_dotenv('.env')
     
 class DBSettings(BaseSettings):
     MYSQL_HOST: str
@@ -11,7 +11,7 @@ class DBSettings(BaseSettings):
     MYSQL_PASSWORD: str
     
     class Config:
-        env_file = 'server/.env'
+        env_file = '.env'
         env_file_encoding = 'utf-8'
         
         
