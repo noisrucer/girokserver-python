@@ -8,14 +8,14 @@
 /.pnp
 .pnp.js
 
-.backend_venv/
-.cli_venv/
 **/__pycache__
 **/.env
 /venv/
 **/venv/
 .idea/
 venv/
+.backend_venv/
+.cli_venv/
 .venv/
 **/.venv/
 # testing
