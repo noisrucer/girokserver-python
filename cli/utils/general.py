@@ -28,3 +28,7 @@ def update_json(fpath, data):
     
 def bytes2dict(b):
     return json.loads(b.decode('utf-8'))
+
+
+def dict2json(d):
+    return json.dumps(d)

@@ -26,6 +26,12 @@ def get_access_token_from_json(fpath):
             return None
         
 
+def build_jwt_header(fpath):
+    return {
+        "Authorization": "Bearer " + get_access_token_from_json(fpath)
+    }
+        
+
 def is_logged_in(config_path):
     return get_access_token_from_json(config_path)
         
