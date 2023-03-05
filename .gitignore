@@ -14,9 +14,9 @@
 **/venv/
 .idea/
 venv/
-.venv/
 .backend_venv/
 .cli_venv/
+.venv/
 **/.venv/
 # testing
 /coverage
