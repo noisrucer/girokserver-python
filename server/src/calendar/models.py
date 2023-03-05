@@ -10,7 +10,7 @@ class Task(Base):
     __tablename__ = "task"
     
     task_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_email = Column(String(100), ForeignKey("user.user_email"), nullable=False)
+    user_email = Column(String(100), ForeignKey("user.email"), nullable=False)
     task_category_id = Column(Integer, ForeignKey('task_category.task_category_id'), nullable=True)
     title = Column(String(300), nullable=False)
     deadline = Column(DateTime, nullable=False)
