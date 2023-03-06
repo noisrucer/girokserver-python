@@ -12,6 +12,7 @@ import utils.auth as auth_utils
 import api.auth as auth_api
 
 app = typer.Typer(rich_markup_mode='rich')
+
 cfg = get_config()
 
 @app.command("login")
@@ -45,7 +46,8 @@ def login():
 
 @app.command("logout")
 def logout():
-    if not auth_utils.is_logged_in(cfg.config_path):
+    access_token = auth_utils.get_access_token_from_json(cfg.config_path)
+    if not auth_utils.is_logged_in(access_token):
         print("You're not logged in.")
         exit(0)
     
@@ -57,6 +59,11 @@ def logout():
     
 @app.command("register")
 def register():
+    access_token = auth_utils.get_access_token_from_json(cfg.config_path)
+    if access_token and auth_utils.is_logged_in(access_token):
+        print("You're logged in. Please try after log out.")
+        exit(0)
+        
     print(":star: This is your first time to use [yellow]girok[/yellow]! :star:\n")
     is_register = typer.confirm("Do you want to register a new account?")
     if is_register:
