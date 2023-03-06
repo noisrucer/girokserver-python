@@ -1,0 +1,4 @@
+DISPLAY_TERMINAL_COLOR_TITLE = "cyan on purple3"
+DISPLAY_TERMINAL_COLOR_SUCCESS = "black on green"
+DISPLAY_TERMINAL_COLOR_ERROR = "black on red"
+DISPLAY_TERMINAL_COLOR_WARNING = "black on bright_red"
