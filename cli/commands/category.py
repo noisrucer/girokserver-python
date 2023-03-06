@@ -90,7 +90,7 @@ def move_category(
         new_cat = '/'.join(new_parent_cat.split('/') + [cat.split('/')[-1]])
         display_utils.center_print(f"Successfully moved {cat} to {new_parent_cat}.\nNew path is {new_cat}", "black on green")
         cats_dict = category_api.get_categories()
-        display_utils.display_categories(cats_dict)
+        display_utils.display_categories(cats_dict, highlight_cat=new_cat)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
         display_utils.center_print(err_msg, "black on bright_red")
