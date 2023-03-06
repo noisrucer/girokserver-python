@@ -10,25 +10,17 @@ import server.src.category.exceptions as exceptions
 import server.src.dependencies as glob_dependencies
 
 router = APIRouter(
-    prefix="",
+    prefix="categories",
     tags=["category"]
 )
 
 @router.get(
-    "/categories",
+    "/",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(glob_dependencies.get_current_user)]
 )
 async def get_all_categories(db: Session = Depends(get_db)):
     resp = dict()
-    # resp = {
-    #     "A": {
-    #         "B": {
-    #             "C": {}
-    #         }  
-    #     },
-    #     "B": {}
-    # }
     cats = service.get_subcategories_by_parent_id(db, None)
     for cat in cats:
         resp[cat.name] = service.build_category_tree(db, cat.task_category_id)
@@ -36,7 +28,7 @@ async def get_all_categories(db: Session = Depends(get_db)):
 
 
 @router.post(
-    "/categories",
+    "/",
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.CategoryCreateOut,
     dependencies=[Depends(glob_dependencies.get_current_user)]
@@ -70,7 +62,7 @@ async def create_category(
 
 
 @router.delete(
-    "/categories",
+    "/",
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(glob_dependencies.get_current_user)]
 )
@@ -85,7 +77,7 @@ async def delete_category(category: schemas.CategoryDeleteIn, db: Session=Depend
         
         
 @router.patch(
-    "/categories/name",
+    "/name",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(glob_dependencies.get_current_user)]
 )
@@ -103,7 +95,7 @@ async def rename_category(category: schemas.CategoryRenameIn, db: Session=Depend
     
 
 @router.patch(
-    "/categories/parent",
+    "/parent",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(glob_dependencies.get_current_user)]
 )
