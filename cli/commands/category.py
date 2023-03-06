@@ -6,6 +6,7 @@ from rich.align import Align
 from rich.padding import Padding
 from rich.panel import Panel
 
+import constants as constants
 from config import get_config
 import api.category as category_api
 import utils.general as general_utils
@@ -20,8 +21,7 @@ cfg = get_config()
 def show_categories():
     cats_dict = category_api.get_categories()
     text = Align.center("[bold red]Task Categories[/bold red]")
-    display_utils.center_print(text, "cyan on purple3")
-    # console.print(Panel(text, title="Welcome", padding=1))
+    display_utils.center_print(text, constants.DISPLAY_TERMINAL_COLOR_TITLE)
     display_utils.display_categories(cats_dict)
     
 
@@ -32,12 +32,12 @@ def add_category(
 ):
     resp = category_api.add_category(cat, color)
     if resp.status_code == 201:
-        display_utils.center_print("Task added successfully!", "black on green")
+        display_utils.center_print("Task added successfully!", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)
         cats_dict = category_api.get_categories()
         display_utils.display_categories(cats_dict, highlight_cat=cat)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, "black on bright_red")
+        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
     else:
         print(resp)
     
@@ -50,14 +50,14 @@ def remove_category(cat: str = typer.Argument(..., help="Category path - xx/yy/z
     
     resp = category_api.remove_category(cat)
     if resp.status_code == 204:
-        display_utils.center_print(f"Deleted {cat} successfully.", "black on green")
+        display_utils.center_print(f"Deleted {cat} successfully.", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)
         cats_dict = category_api.get_categories()
         display_utils.display_categories(cats_dict)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, "black on bright_red")
+        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
     else:
-        display_utils.center_print(resp.content, "black on bright_red")
+        display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
         
         
 @app.command("rncat")
@@ -73,9 +73,9 @@ def rename_category(
         display_utils.display_categories(cats_dict, highlight_cat=new_cat)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, "black on bright_red")
+        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
     else:
-        display_utils.center_print(resp.content, "black on bright_red")
+        display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
         
         
 @app.command("mvcat")
@@ -93,9 +93,9 @@ def move_category(
         display_utils.display_categories(cats_dict, highlight_cat=new_cat)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, "black on bright_red")
+        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
     else:
-        display_utils.center_print(resp.content, "black on bright_red")
+        display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
     
 
 @app.command("open")
