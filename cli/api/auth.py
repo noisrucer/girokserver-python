@@ -11,7 +11,7 @@ def register(email, password):
     
 
 def login(email, password):
-    files = {
+    files = { 
         "username": (None, email),
         "password": (None, password)
     }

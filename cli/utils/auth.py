@@ -2,6 +2,7 @@ import json
 from rich import print
 
 import utils.general as general_utils
+import api.auth as auth_api
 
 def match_passwords(pwd, confirm_pwd):
     if pwd != confirm_pwd:
@@ -26,8 +27,15 @@ def get_access_token_from_json(fpath):
             return None
         
 
-def is_logged_in(config_path):
-    return get_access_token_from_json(config_path)
+def build_jwt_header(fpath):
+    return {
+        "Authorization": "Bearer " + get_access_token_from_json(fpath)
+    }
+        
+
+def is_logged_in(access_token):
+    resp = auth_api.validate_access_token(access_token)
+    return True if resp.status_code == 200 else False
         
 
 def store_access_token_to_json(fpath, access_token):

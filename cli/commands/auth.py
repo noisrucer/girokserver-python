@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 import os.path as osp
 
 import typer
@@ -7,20 +6,19 @@ from rich import print
 from rich.console import Console
 from rich.table import Table
 
+from config import get_config
 import utils.general as general_utils
 import utils.auth as auth_utils
 import api.auth as auth_api
 
 app = typer.Typer(rich_markup_mode='rich')
 
-APP_NAME = "girok"
-APP_DIR = typer.get_app_dir(APP_NAME)
-CONFIG_PATH: Path = Path(APP_DIR) / "config.json"
+cfg = get_config()
 
 @app.command("login")
 def login():
     # Check if the user holds a valid JWT (logged in)
-    stored_access_token = auth_utils.get_access_token_from_json(CONFIG_PATH)
+    stored_access_token = auth_utils.get_access_token_from_json(cfg.config_path)
     if stored_access_token:
         resp = auth_api.validate_access_token(stored_access_token)
         if resp.status_code == 200:
@@ -37,7 +35,7 @@ def login():
     resp = auth_api.login(email, password)
     if resp.status_code == 200:
         access_token = general_utils.bytes2dict(resp.content)['access_token']
-        general_utils.update_json(CONFIG_PATH, {"access_token": access_token})
+        general_utils.update_json(cfg.config_path, {"access_token": access_token})
         print("You're logged in!")
         
     else:
@@ -48,11 +46,12 @@ def login():
 
 @app.command("logout")
 def logout():
-    if not auth_utils.is_logged_in(CONFIG_PATH):
+    access_token = auth_utils.get_access_token_from_json(cfg.config_path)
+    if not auth_utils.is_logged_in(access_token):
         print("You're not logged in.")
         exit(0)
     
-    auth_utils.remove_access_token(CONFIG_PATH)
+    auth_utils.remove_access_token(cfg.config_path)
     print("Successfully logged out")
     exit(0)
     
@@ -60,6 +59,11 @@ def logout():
     
 @app.command("register")
 def register():
+    access_token = auth_utils.get_access_token_from_json(cfg.config_path)
+    if access_token and auth_utils.is_logged_in(access_token):
+        print("You're logged in. Please try after log out.")
+        exit(0)
+        
     print(":star: This is your first time to use [yellow]girok[/yellow]! :star:\n")
     is_register = typer.confirm("Do you want to register a new account?")
     if is_register:
