@@ -23,3 +23,15 @@ class SubcategoryNotExistException(HTTPException):
             self.detail = f"There is no category named {sub}."
         else:
             self.detail = f"'{sup}' does not have a subcategory named '{sub}'"
+            
+
+class CannotMoveRootDirectoryException(HTTPException):
+    def __init__(self):
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = "Cannot move the root directory!"
+        
+        
+class CannotMoveToSameLocation(HTTPException):
+    def __init__(self):
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = "[Warning] Circular reference prohibited."
