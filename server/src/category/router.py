@@ -10,7 +10,7 @@ import server.src.category.exceptions as exceptions
 import server.src.dependencies as glob_dependencies
 
 router = APIRouter(
-    prefix="categories",
+    prefix="/categories",
     tags=["category"]
 )
 
