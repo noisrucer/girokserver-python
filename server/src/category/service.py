@@ -1,9 +1,7 @@
-from fastapi import Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
 import server.src.category.exceptions as exceptions
-
 import server.src.category.models as models
 
 def create_category(db: Session, cat_data):
@@ -14,36 +12,48 @@ def create_category(db: Session, cat_data):
     return new_cat
 
 
-def delete_category(db: Session, cat_id: int):
+def delete_category(db: Session, user_id: int, cat_id: int):
     cat = db.query(models.TaskCategory).\
-        filter(models.TaskCategory.task_category_id == cat_id).\
-        first()
+        filter(
+            and_(
+               models.TaskCategory.user_id == user_id,  
+               models.TaskCategory.task_category_id == cat_id 
+            )).first()
     db.delete(cat)
     db.commit()
     return cat
 
 
-def rename_category(db: Session, cat_id: int, new_name: str):
+def rename_category(db: Session, user_id: int, cat_id: int, new_name: str):
     cat = db.query(models.TaskCategory).\
-        filter(models.TaskCategory.task_category_id == cat_id).first()
+        filter(
+            and_(
+                models.TaskCategory.user_id == user_id,
+                models.TaskCategory.task_category_id == cat_id
+            )
+            ).first()
     setattr(cat, "name", new_name)
     db.commit()
     
     
-def move_category(db: Session, cat_id: int, new_pid: int):
+def move_category(db: Session, user_id: int, cat_id: int, new_pid: int):
     print(cat_id, new_pid)
     cat = db.query(models.TaskCategory).\
-        filter(models.TaskCategory.task_category_id == cat_id).\
-        first()
-    print(cat_id, new_pid)
+        filter(
+            and_(
+                models.TaskCategory.task_category_id == cat_id,
+                models.TaskCategory.user_id == user_id
+            )
+            ).first()
     setattr(cat, "super_task_category_id", new_pid)
     db.commit()
 
 
-def get_category_id_by_name_and_parent_id(db: Session, name: str, parent_id: int):
+def get_category_id_by_name_and_parent_id(db: Session, user_id: int, name: str, parent_id: int):
     category = db.query(models.TaskCategory.task_category_id).\
         filter(
             and_(
+                models.TaskCategory.user_id == user_id,
                 models.TaskCategory.name == name,
                 models.TaskCategory.super_task_category_id == parent_id
             )
@@ -60,20 +70,23 @@ def get_category_name_by_id(db: Session, cat_id: int):
     return cat_id[0] if cat else None
 
 
-def get_subcategories_by_parent_id(db: Session, pid: int):
+def get_subcategories_by_parent_id(db: Session, user_id: int, pid: int):
     subcats = db.query(models.TaskCategory).\
-        filter(models.TaskCategory.super_task_category_id == pid).\
-        all()
+        filter(
+            and_(
+                models.TaskCategory.user_id == user_id,
+                models.TaskCategory.super_task_category_id == pid)    
+            ).all()
     return subcats
 
 
-def build_category_tree(db: Session, cat_id):
-    subs = get_subcategories_by_parent_id(db, cat_id)
+def build_category_tree(db: Session, user_id, cat_id):
+    subs = get_subcategories_by_parent_id(db, user_id, cat_id)
     if subs is None: # Base case
         return {}
     res = dict()
     for sub in subs:
-        res[sub.name] = build_category_tree(db, sub.task_category_id)
+        res[sub.name] = build_category_tree(db, user_id, sub.task_category_id)
     return res
 
 
@@ -88,7 +101,7 @@ def is_super_category(db: Session, super: str, sub: str):
     return sub_cat
 
 
-def get_last_cat_id(db: Session, cats):
+def get_last_cat_id(db: Session, user_id: int, cats: list):
     '''
     ex) ['HKU', 'COMP3230', 'Assignment'] -> return id of COMP3230
     cats: list[str]
@@ -102,7 +115,7 @@ def get_last_cat_id(db: Session, cats):
         return parent_id, cumul_path
     
     for cat_name in cats:
-        cat_id = get_category_id_by_name_and_parent_id(db, cat_name, parent_id)
+        cat_id = get_category_id_by_name_and_parent_id(db, user_id, cat_name, parent_id)
         if not cat_id:
             raise exceptions.SubcategoryNotExistException(cumul_path, cat_name)
         parent_id = cat_id
@@ -110,12 +123,26 @@ def get_last_cat_id(db: Session, cats):
     return parent_id, cumul_path
 
 
-def check_exist_category(db: Session, cats: list):
+def check_exist_category(db: Session, user_id: int, cats: list):
     parent_id = None
     for cat_name in cats:
-        cat_id = get_category_id_by_name_and_parent_id(db, cat_name, parent_id)
+        cat_id = get_category_id_by_name_and_parent_id(db, user_id, cat_name, parent_id)
         if not cat_id:
             return False
         parent_id = cat_id
     return True
     
+
+def get_category_color_by_id(db: Session, user_id: int, cat_id: int):
+    cat = db.query(models.TaskCategory).\
+        filter(
+                and_(
+                    models.TaskCategory.user_id == user_id,
+                    models.TaskCategory.task_category_id == cat_id   
+                )
+            ).first()
+    if not cat:
+        return None
+    return cat.color
+
+

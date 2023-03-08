@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, status, Depends, BackgroundTasks
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from pydantic import EmailStr
 
@@ -18,6 +18,8 @@ import server.src.user.service as user_service
 from server.src.auth.config import get_jwt_settings
 
 jwt_settings = get_jwt_settings()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 router = APIRouter(
     prefix="",
@@ -90,6 +92,6 @@ async def login(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.get("/validate-access-token", dependencies=[Depends(glob_dependencies.get_current_user)])
-async def validate_jwt():
-    return {"detail": "validated"}
+@router.get("/validate-access-token")
+async def validate_jwt(current_user: user_models.User = Depends(glob_dependencies.get_current_user)):
+    return {"current_user_email": current_user.email}
