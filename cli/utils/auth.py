@@ -14,6 +14,7 @@ def remove_access_token(config_path):
     with open(config_path, 'r') as f:
         org_data = json.load(f)
         del org_data['access_token']
+        del org_data['email']
         
     general_utils.write_json(config_path, org_data)
         
@@ -23,6 +24,15 @@ def get_access_token_from_json(fpath):
         data = json.load(f)
         if "access_token" in data:
             return data['access_token']
+        else:
+            return None
+        
+
+def get_user_email_from_json(fpath):
+    with open(fpath, 'r') as f:
+        data = json.load(f)
+        if "email" in data:
+            return data['email']
         else:
             return None
         

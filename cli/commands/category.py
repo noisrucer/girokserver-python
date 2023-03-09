@@ -11,13 +11,14 @@ from config import get_config
 import api.category as category_api
 import utils.general as general_utils
 import utils.display as display_utils
+import utils.auth as auth_utils
 import webbrowser
 
 app = typer.Typer(rich_markup_mode='rich')
 console = Console()
 cfg = get_config()
 
-@app.command("showcats")
+@app.command("showcat")
 def show_categories():
     cats_dict = category_api.get_categories()
     text = Align.center("[bold red]Task Categories[/bold red]")
@@ -27,7 +28,7 @@ def show_categories():
 
 @app.command("addcat")
 def add_category(
-    cat: str = typer.Argument(..., help="Category name - xx/yy/zz.."),
+    cat: str = typer.Argument(..., help="Category path - xx/yy/zz.."),
     color: str = typer.Option("yellow", "-c", "--color", help="Color for category")
 ):
     resp = category_api.add_category(cat, color)
@@ -47,7 +48,7 @@ def remove_category(cat: str = typer.Argument(..., help="Category path - xx/yy/z
     confirm_rm = typer.confirm(f"[WARNING] Are you sure to delete '{cat}'?\nAll the subdirectories will also be deleted.")
     if not confirm_rm:
         exit(0)
-    
+        
     resp = category_api.remove_category(cat)
     if resp.status_code == 204:
         display_utils.center_print(f"Deleted {cat} successfully.", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)

@@ -29,13 +29,11 @@ def login():
     print("Please login to proceed")
     email = typer.prompt("Enter email address")
     password = typer.prompt("Enter password", hide_input=True)
-    confirm_password = typer.prompt("Confirm password", hide_input=True)
-    auth_utils.match_passwords(password, confirm_password)
     
     resp = auth_api.login(email, password)
     if resp.status_code == 200:
         access_token = general_utils.bytes2dict(resp.content)['access_token']
-        general_utils.update_json(cfg.config_path, {"access_token": access_token})
+        general_utils.update_json(cfg.config_path, {"access_token": access_token, "email": email})
         print("You're logged in!")
         
     else:

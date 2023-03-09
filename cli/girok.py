@@ -11,12 +11,14 @@ from config import get_config
 import api.auth as auth_api
 import commands.auth as auth_command
 import commands.category as category_command
+import commands.task as task_command
 import utils.general as general_utils
 import utils.auth as auth_utils
 
 app = typer.Typer(rich_markup_mode='rich')
 app.registered_commands.extend(auth_command.app.registered_commands)
 app.registered_commands.extend(category_command.app.registered_commands)
+app.registered_commands.extend(task_command.app.registered_commands)
 cfg = get_config()
     
 @app.command()
