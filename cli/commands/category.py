@@ -1,3 +1,5 @@
+import re
+
 import typer
 from rich import print
 from rich.console import Console
@@ -18,6 +20,22 @@ app = typer.Typer(rich_markup_mode='rich')
 console = Console()
 cfg = get_config()
 
+def category_callback(ctx: typer.Context, param: typer.CallbackParam, value: str):
+    command_name = ctx.command.name
+    if value is None:
+        return None
+
+    if not re.match("^([a-zA-Z0-9]+/)*[a-zA-Z0-9]+/?$", value):
+        raise typer.BadParameter("[Invalid category path] Category path must be in 'xx/yy/zz format.'")
+
+    if value.endswith('/'):
+        value =value[:-1]
+        
+    if value == 'none':
+        raise typer.BadParameter("Sorry, 'none' is a reserved category name.")
+    return value
+
+
 @app.command("showcat")
 def show_categories():
     cats_dict = category_api.get_categories()
@@ -28,7 +46,7 @@ def show_categories():
 
 @app.command("addcat")
 def add_category(
-    cat: str = typer.Argument(..., help="Category path - xx/yy/zz.."),
+    cat: str = typer.Argument(..., help="Category path - xx/yy/zz..", callback=category_callback),
     color: str = typer.Option("yellow", "-c", "--color", help="Color for category")
 ):
     resp = category_api.add_category(cat, color)
