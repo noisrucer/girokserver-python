@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from calendar import monthrange
+import calendar
 
 def is_valid_year(year: int):
     if year < datetime.now().year - 3 or year > datetime.now().year + 10:
@@ -107,3 +108,32 @@ def get_current_weekday_num():
     now = datetime.now()
     current_weekday_num = now.weekday()
     return current_weekday_num
+
+
+def get_weekday_name_from_date(year, month, day, abbr=True):
+    time = datetime.strptime(f"{year}-{month}-{day}", "%Y-%m-%d")
+    if abbr:
+        return calendar.day_abbr[time.weekday()]
+    else:
+        return calendar.day_name[time.weekday()]
+
+
+def get_month_name_from_month(month: int, abbr=True):
+    if abbr:
+        return calendar.month_abbr[month]
+    else:
+        return calendar.month_name[month]
+
+
+def build_date_info(dt: datetime):
+    year, month, day = dt.year, dt.month, dt.day
+    h, m, s = str(dt.time()).split(":")
+    month_name = get_month_name_from_month(month, abbr=True)
+    weekday_name = get_weekday_name_from_date(year, month, day, abbr=False)
+    return f"{weekday_name}, {month_name} {day}, {year}"
+
+def get_day_offset_between_two_dates(dt1, dt2):
+    dt1 = datetime.strptime(f"{dt1.year}-{dt1.month}-{dt1.day}", "%Y-%m-%d")
+    dt2 = datetime.strptime(f"{dt2.year}-{dt2.month}-{dt2.day}", "%Y-%m-%d")
+    diff = dt2 - dt1
+    return diff.days

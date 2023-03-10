@@ -47,7 +47,7 @@ def show_categories():
 @app.command("addcat")
 def add_category(
     cat: str = typer.Argument(..., help="Category path - xx/yy/zz..", callback=category_callback),
-    color: str = typer.Option("yellow", "-c", "--color", help="Color for category")
+    color: str = typer.Option(None, "-c", "--color", help="Color for category")
 ):
     resp = category_api.add_category(cat, color)
     if resp.status_code == 201:

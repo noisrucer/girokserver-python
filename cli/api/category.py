@@ -20,7 +20,7 @@ def get_categories():
     
     
 
-def add_category(cat_str: str, color='yellow'):
+def add_category(cat_str: str, color=None):
     cats = cat_str.split('/')
     resp = requests.post(
         cfg.base_url + "/categories",

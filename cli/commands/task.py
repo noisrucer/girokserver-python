@@ -291,6 +291,13 @@ def add_task(
     
     if resp.status_code == 201:
         display_utils.center_print("Task added successfully!", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)
+        tasks_resp = task_api.get_tasks()
+        tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
+        task_tree = display_utils.display_tasks_by_category(tasks)
+        current_date = task_utils.build_date_info(datetime.now())
+        display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
+        print(task_tree)
+        
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
         display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
@@ -410,14 +417,10 @@ def show_task(
     
     if resp.status_code == 200:
         tasks = general_utils.bytes2dict(resp.content)['tasks']
-        for task in tasks:
-            task_name = task['name']
-            task_deadline = task['deadline']
-            color = task['color']
-            category_path = task['category_path']
-            if category_path == "":
-                category_path = "/"
-            print(f":point_right: [bold yellow]{task_name}[/bold yellow]\n   - Deadline: {task_deadline}\n   - Category: [bold red]{category_path}[/bold red]")
+        task_tree = display_utils.display_tasks_by_category(tasks)
+        current_date = task_utils.build_date_info(datetime.now())
+        display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
+        print(task_tree)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
         display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)

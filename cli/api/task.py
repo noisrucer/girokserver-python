@@ -14,12 +14,12 @@ def create_task(task_data: dict):
 
 
 def get_tasks(
-    cats: list,
-    start_date: Union[str, None],
-    end_date: Union[str, None],
-    min_pri: Union[int, None],
-    max_pri: Union[int, None],
-    tag: str
+    cats: Union[list, None] = None,
+    start_date: Union[str, None] = None,
+    end_date: Union[str, None] = None,
+    min_pri: Union[int, None] = None,
+    max_pri: Union[int, None] = None,
+    tag: Union[str, None] = None
 ):
     query_str_obj = {
         "category": cats,
