@@ -9,7 +9,7 @@ class CategoryOut(BaseModel):
     resp: Dict[str, dict]
     
 class CategoryCreateIn(BaseModel):
-    color: str
+    color: Union[str, None]
     names: List[str]
     
 

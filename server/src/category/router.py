@@ -10,6 +10,7 @@ import server.src.category.service as service
 import server.src.user.service as user_service
 import server.src.category.exceptions as exceptions
 import server.src.dependencies as glob_dependencies
+import server.src.category.constants as category_constants
 
 router = APIRouter(
     prefix="/categories",
@@ -51,8 +52,17 @@ async def create_category(
     '''
     names = category['names']
     color = category['color']
+    print(color)
     user_id = current_user.user_id
     pid_of_last_cat, cumul_path = service.get_last_cat_id(db, user_id, names[:-1])
+    
+    # If given, check if the subdirectory color is equal to the parent's color,
+    if color is None:
+        if pid_of_last_cat is not None:
+            color = service.get_category_color_by_id(db, user_id, pid_of_last_cat) # set to parent's color
+        else:
+            color = category_constants.DEFAULT_CATEGORY_COLOR # If no color is given, set it to default
+        
     new_cat_name = names[-1]
     dup_cat_id = service.get_category_id_by_name_and_parent_id(db, user_id, new_cat_name, pid_of_last_cat)
     if dup_cat_id:
@@ -125,7 +135,6 @@ async def move_category(
     category = category.dict()
     cats, new_parent_cats = category['cats'], category['new_parent_cats']
     user_id = current_user.user_id
-    
     if not cats:
         raise exceptions.CannotMoveRootDirectoryException()
     

@@ -37,7 +37,6 @@ def rename_category(db: Session, user_id: int, cat_id: int, new_name: str):
     
     
 def move_category(db: Session, user_id: int, cat_id: int, new_pid: int):
-    print(cat_id, new_pid)
     cat = db.query(models.TaskCategory).\
         filter(
             and_(
@@ -64,10 +63,13 @@ def get_category_id_by_name_and_parent_id(db: Session, user_id: int, name: str, 
 
 
 def get_category_name_by_id(db: Session, cat_id: int):
+    if cat_id is None:
+        return "No Category "
+    
     cat = db.query(models.TaskCategory.name).\
         filter(models.TaskCategory.task_category_id == cat_id).\
         first()
-    return cat_id[0] if cat else None
+    return cat[0] if cat else None
 
 
 def get_subcategories_by_parent_id(db: Session, user_id: int, pid: int):
@@ -78,6 +80,12 @@ def get_subcategories_by_parent_id(db: Session, user_id: int, pid: int):
                 models.TaskCategory.super_task_category_id == pid)    
             ).all()
     return subcats
+
+
+def get_subcategory_ids_by_parent_id(db: Session, user_id: int, pid: int):
+    sub_cats = get_subcategories_by_parent_id(db, user_id, pid)
+    sub_cats_id = [sub.task_category_id for sub in sub_cats]
+    return sub_cats_id
 
 
 def build_category_tree(db: Session, user_id, cat_id):
@@ -144,5 +152,23 @@ def get_category_color_by_id(db: Session, user_id: int, cat_id: int):
     if not cat:
         return None
     return cat.color
+
+
+def get_category_full_path_by_id(db: Session, user_id: int, category_id: int):
+    cat_path = ""
+    cat = db.query(models.TaskCategory).\
+        filter(
+            and_(
+                models.TaskCategory.user_id == user_id,
+                models.TaskCategory.task_category_id == category_id
+            )
+        ).first()
+    cat_name = cat.name
+    super_cat_id = cat.super_task_category_id
+    if super_cat_id is None: # base case
+        return cat_name + "/"
+    super_cat_full_path = get_category_full_path_by_id(db, user_id, super_cat_id)
+    cat_path = super_cat_full_path + cat_name + "/"
+    return cat_path
 
 
