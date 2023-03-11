@@ -5,6 +5,7 @@ from rich.console import Console
 from rich.padding import Padding
 from rich.tree import Tree
 from rich.align import Align
+from rich.layout import Layout
 import shutil
 
 import utils.task as task_utils

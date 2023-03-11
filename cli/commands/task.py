@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-
+from time import sleep
 import typer
 from rich import print
 from rich.console import Console
@@ -8,6 +8,7 @@ from rich.table import Table
 from rich.align import Align
 from rich.padding import Padding
 from rich.panel import Panel
+from rich.layout import Layout
 
 import constants as constants
 from config import get_config
@@ -17,9 +18,12 @@ import utils.general as general_utils
 import utils.display as display_utils
 import utils.task as task_utils
 import utils.auth as auth_utils
+from rich.live import Live
+
 
 app = typer.Typer(rich_markup_mode='rich')
 console = Console()
+layout = Layout()
 cfg = get_config()
 
 # Code Credits: https://github.com/tiangolo/typer/issues/140#issuecomment-898937671
@@ -334,7 +338,8 @@ def show_task(
     next_sun: bool = typer.Option(None, "-n7", "--nextsun", help="Show tasks due exactly next Sunday", callback=show_task_date_exclusivity_callback),
     urgent: bool = typer.Option(None, "-u", "--urgent", help="Show urgent tasks (due within 3 days)", callback=show_task_date_exclusivity_callback),
     priority: int = typer.Option(None, "-p", "--priority", help="Show tasks of the given priority"),
-    tag: str = typer.Option(None, "--tag", help="Show tasks belonging to the given tag")
+    tag: str = typer.Option(None, "--tag", help="Show tasks belonging to the given tag"),
+    tree_view: bool = typer.Option(None, "--tree", help="Show tasks with tree view"),
 ):
     # (1) Category - if None, show ALL categories (including "None" category)
     # To show "None" category, user must provide explicitly
@@ -404,7 +409,6 @@ def show_task(
             weekday_num=this_week_day_num
         )
         start_date, end_date = f"{year}-{month}-{day} 00:00:00", f"{year}-{month}-{day} 11:59:59"
-    # print(start_date, end_date)
 
     resp = task_api.get_tasks(
         cats=cats,
@@ -421,6 +425,26 @@ def show_task(
         current_date = task_utils.build_date_info(datetime.now())
         display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
         print(task_tree)
+        # app = StopwatchApp()
+        # app.run()
+        # layout.split_row(
+        #     Layout(name="left"),
+        #     Layout(name="right")
+        # )
+        # layout["left"].split_column(
+        #     Layout(name="title"),
+        #     Layout(name="task", ratio=8)
+        # )
+        # layout['title'].size = None
+        # layout['title'].size = 0.5
+        # layout['title'].update(Panel("Category", border_style="blue"))
+        # layout['task'].update(Panel(task_tree, border_style="red"))
+        # # def onkeypress(event):
+        # #     if event.name == 'q':
+        # #         exit(0)
+        # with Live(layout, screen=True) as live:
+        #     while True:
+        #         sleep(1)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
         display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
