@@ -39,6 +39,7 @@ def category_callback(ctx: typer.Context, param: typer.CallbackParam, value: str
 @app.command("showcat")
 def show_categories():
     cats_dict = category_api.get_categories()
+    print(cats_dict)
     text = Align.center("[bold red]Task Categories[/bold red]")
     display_utils.center_print(text, constants.DISPLAY_TERMINAL_COLOR_TITLE)
     display_utils.display_categories(cats_dict)

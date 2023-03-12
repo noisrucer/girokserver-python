@@ -86,6 +86,7 @@ def build_time_window_by_month_offset(month_offset: int):
     end_date = f"{new_year}-{new_month}-{last_day_of_end_month} 11:59:59"
     return start_date, end_date
 
+
 def build_current_month_time_window():
     now = datetime.now()
     current_year, current_month = now.year, now.month
@@ -95,10 +96,11 @@ def build_current_month_time_window():
     return start_date, end_date
     
 
-def get_year_and_month_by_month_offset(month_offset: int):
-    now = datetime.now()
-    current_year, current_month = now.year, now.month
-    new_months = (current_year * 12 + current_month + month_offset)
+def get_year_and_month_by_month_offset(month_offset: int, year=None, month=None):
+    if year is None and month is None:
+        now = datetime.now()
+        year, month = now.year, now.month
+    new_months = (year * 12 + month + month_offset)
     new_year = new_months // 12
     new_month = new_months % 12
     return new_year, new_month
@@ -120,9 +122,9 @@ def get_weekday_name_from_date(year, month, day, abbr=True):
 
 def get_month_name_from_month(month: int, abbr=True):
     if abbr:
-        return calendar.month_abbr[month]
+        return get_month_name_by_number(month, abbr=True)
     else:
-        return calendar.month_name[month]
+        return get_month_name_by_number(month, abbr=False)
 
 
 def build_date_info(dt: datetime):
@@ -132,8 +134,18 @@ def build_date_info(dt: datetime):
     weekday_name = get_weekday_name_from_date(year, month, day, abbr=False)
     return f"{weekday_name}, {month_name} {day}, {year}"
 
+
 def get_day_offset_between_two_dates(dt1, dt2):
     dt1 = datetime.strptime(f"{dt1.year}-{dt1.month}-{dt1.day}", "%Y-%m-%d")
     dt2 = datetime.strptime(f"{dt2.year}-{dt2.month}-{dt2.day}", "%Y-%m-%d")
     diff = dt2 - dt1
     return diff.days
+
+def get_month_name_by_number(month_num: int, abbr=False):
+    """
+    month_num: 0 ~ 11
+    """
+    if abbr:
+        return calendar.month_name[month_num + 1]
+    else:
+        return calendar.month_abbr[month_num + 1]
