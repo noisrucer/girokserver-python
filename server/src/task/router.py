@@ -15,6 +15,7 @@ import server.src.category.service as category_service
 import server.src.user.models as user_models
 import server.src.task.exceptions as exceptions
 import server.src.dependencies as glob_dependencies
+import server.src.task.enums as task_enums
 
 
 router = APIRouter(
@@ -41,8 +42,8 @@ async def create_task(
 
 @router.get(
     "/",
-    status_code=status.HTTP_200_OK,
-    response_model=schemas.TaskOut
+    status_code=status.HTTP_200_OK
+    # response_model=schemas.TaskOut
 )
 async def get_tasks(
     category: Union[List[str], None] = Query(
@@ -78,11 +79,14 @@ async def get_tasks(
         default=None,
         title="Tag"
     ),
+    view: Union[task_enums.TaskView, None]= Query(
+        default=None,
+        title="View method for tasks"  
+    ),
     db: Session = Depends(get_db),
     current_user: user_models.User = Depends(glob_dependencies.get_current_user)
 ):
     user_id = current_user.user_id
-    # Category
     
     # min_pri and max_pri must be both None or int 
     if bool(min_pri) ^ bool(max_pri):
@@ -99,24 +103,38 @@ async def get_tasks(
         raise exceptions.InvalidDateWindowException(start_date, end_date)
     
     if category is None: # ALL tasks regardless of category
-        cat_id = -1
         cat_ids = category_service.get_subcategory_ids_by_parent_id(db, user_id, None) # top most categories
+        cat_ids += [None]
     elif category == ['']: # Only "None category" category
         cat_ids = [None]
     else: # Specified category
         cat_id, _ = category_service.get_last_cat_id(db, user_id, category)
         cat_ids = [cat_id]
 
-    tasks = service.get_tasks_by_category(
-        db=db,
-        user_id=user_id,
-        cat_ids=cat_ids,
-        start_date=start_date,
-        end_date=end_date,
-        min_pri=min_pri,
-        max_pri=max_pri,
-        tag=tag
-    )
+    if view == task_enums.TaskView.category:
+        tasks = service.get_tasks_by_category(
+            db=db,
+            user_id=user_id,
+            cat_ids=cat_ids,
+            start_date=start_date,
+            end_date=end_date,
+            min_pri=min_pri,
+            max_pri=max_pri,
+            tag=tag
+        )
+    elif view == task_enums.TaskView.list:
+        tasks = service.get_tasks_as_list(
+            db=db,
+            user_id=user_id,
+            cat_ids=cat_ids,
+            start_date=start_date,
+            end_date=end_date,
+            min_pri=min_pri,
+            max_pri=max_pri,
+            tag=tag
+        )
+    else:
+        raise Exception("Invalid task view!")
     
     # resp = []
     # for task in tasks:
@@ -130,6 +148,7 @@ async def get_tasks(
     #             continue
     #         task_data[col.name] = getattr(task, col.name)
     #     resp.append(task_data)
+    pprint.pprint(tasks)
         
     return {"tasks": tasks}
     

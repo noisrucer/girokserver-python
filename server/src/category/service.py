@@ -64,7 +64,7 @@ def get_category_id_by_name_and_parent_id(db: Session, user_id: int, name: str, 
 
 def get_category_name_by_id(db: Session, cat_id: int):
     if cat_id is None:
-        return "No Category "
+        return "No Category"
     
     cat = db.query(models.TaskCategory.name).\
         filter(models.TaskCategory.task_category_id == cat_id).\
@@ -155,6 +155,8 @@ def get_category_color_by_id(db: Session, user_id: int, cat_id: int):
 
 
 def get_category_full_path_by_id(db: Session, user_id: int, category_id: int):
+    if category_id is None:
+        return ""
     cat_path = ""
     cat = db.query(models.TaskCategory).\
         filter(
@@ -170,5 +172,8 @@ def get_category_full_path_by_id(db: Session, user_id: int, category_id: int):
     super_cat_full_path = get_category_full_path_by_id(db, user_id, super_cat_id)
     cat_path = super_cat_full_path + cat_name + "/"
     return cat_path
+
+
+# def get_all_recursive_cat_ids_by_id(db: Session, user_id: int, )
 
 

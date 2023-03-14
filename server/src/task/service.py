@@ -40,7 +40,10 @@ def get_tasks_by_category(
             max_pri=max_pri,
             tag=tag
         )
-        sub_cat_ids = category_service.get_subcategory_ids_by_parent_id(db, user_id, cat_id)
+        if cat_id is not None:
+            sub_cat_ids = category_service.get_subcategory_ids_by_parent_id(db, user_id, cat_id)
+        else:
+            sub_cat_ids = []
         tasks[cat_name]["tasks"] = cat_tasks
         tasks[cat_name]["sub_categories"] = get_tasks_by_category(
             db=db,
@@ -54,11 +57,9 @@ def get_tasks_by_category(
         )
     
     return tasks
-                
-        
+     
 
-
-def get_tasks(
+def get_tasks_as_list(
     db: Session,
     user_id: int,
     cat_ids: Union[List[int], None],
@@ -68,38 +69,82 @@ def get_tasks(
     max_pri: int,
     tag: str
 ):
-    tasks_query = db.query(models.Task).\
-        filter(
-            and_(
-                models.Task.user_id == user_id,
-                func.date(models.Task.deadline) >= start_date,
-                func.date(models.Task.deadline) <= end_date
-            )
+    if not cat_ids:
+        return []
+    tasks = []
+    for cat_id in cat_ids:
+        cat_tasks = get_direct_tasks_of_category(
+            db=db,
+            user_id=user_id,
+            cat_id=cat_id,
+            start_date=start_date,
+            end_date=end_date,
+            min_pri=min_pri,
+            max_pri=max_pri,
+            tag=tag
         )
-        
-    if tag:
-        tasks_query = db.query(models.Task).filter(models.Task.tag == tag)
-        
-    # Case 1) cat_id == -1 -> ALL categories
-    # cat_id == None -> show "none" category
-    # cat_id >= 1 -> show selected category
-    if cat_ids is not None: # Show selected category tasks
-        tasks_query = tasks_query.filter(models.Task.task_category_id.in_(cat_ids))
-        
-    if min_pri is None and max_pri is None:
-        tasks_query = tasks_query.filter(models.Task.priority == None)
-    elif min_pri and max_pri:
-        tasks_query = tasks_query.filter(
-            and_(
-                models.Task.priority >= min_pri,
-                models.Task.priority <= max_pri   
-            )
+        tasks += cat_tasks
+        if cat_id is not None:
+            sub_cat_ids = category_service.get_subcategory_ids_by_parent_id(db, user_id, cat_id)
+        else:
+            sub_cat_ids = []
+        tasks += get_tasks_as_list(
+            db=db,
+            user_id=user_id,
+            cat_ids=sub_cat_ids,
+            start_date=start_date,
+            end_date=end_date,
+            min_pri=min_pri,
+            max_pri=max_pri,
+            tag=tag
         )
-    else: # only one is None
-        raise exceptions.InvalidPriorityPairException()
     
-    tasks = tasks_query.order_by(models.Task.deadline.asc()).all()
     return tasks
+   
+           
+
+# def get_tasks_as_list(
+#     db: Session,
+#     user_id: int,
+#     cat_ids: Union[List[int], None],
+#     start_date: datetime,
+#     end_date: datetime,
+#     min_pri: int,
+#     max_pri: int,
+#     tag: str
+# ):
+#     tasks_query = db.query(models.Task).\
+#         filter(
+#             and_(
+#                 models.Task.user_id == user_id,
+#                 func.date(models.Task.deadline) >= start_date,
+#                 func.date(models.Task.deadline) <= end_date
+#             )
+#         )
+        
+#     if tag:
+#         tasks_query = db.query(models.Task).filter(models.Task.tag == tag)
+        
+#     # cat_ids = [None] -> None category
+#     # cat_ids = [1, 2, 3] -> Show selected categories
+#     # cat_ids = None -> all categories 
+#     if cat_ids is not None: # Show selected category tasks
+#         tasks_query = tasks_query.filter(models.Task.task_category_id.in_(cat_ids))
+        
+#     if min_pri is None and max_pri is None:
+#         tasks_query = tasks_query.filter(models.Task.priority == None)
+#     elif min_pri and max_pri:
+#         tasks_query = tasks_query.filter(
+#             and_(
+#                 models.Task.priority >= min_pri,
+#                 models.Task.priority <= max_pri   
+#             )
+#         )
+#     else: # only one is None
+#         raise exceptions.InvalidPriorityPairException()
+    
+#     tasks = tasks_query.order_by(models.Task.deadline.asc()).all()
+#     return tasks
     
 
 def get_tags(db: Session, user_id: int):
@@ -151,6 +196,10 @@ def get_direct_tasks_of_category(
     
     tasks = tasks_query.order_by(models.Task.deadline.asc()).all()
     tasks_obj_list = general_utils.sql_obj_list_to_dict_list(tasks)
+    for task_obj in tasks_obj_list:
+        task_obj.update({
+            "task_category_full_path": category_service.get_category_full_path_by_id(db, user_id, task_obj['task_category_id'])
+        })
     return tasks_obj_list
     
 
