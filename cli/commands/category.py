@@ -1,3 +1,5 @@
+import re
+
 import typer
 from rich import print
 from rich.console import Console
@@ -11,15 +13,33 @@ from config import get_config
 import api.category as category_api
 import utils.general as general_utils
 import utils.display as display_utils
+import utils.auth as auth_utils
 import webbrowser
 
 app = typer.Typer(rich_markup_mode='rich')
 console = Console()
 cfg = get_config()
 
-@app.command("showcats")
+def category_callback(ctx: typer.Context, param: typer.CallbackParam, value: str):
+    command_name = ctx.command.name
+    if value is None:
+        return None
+
+    if not re.match("^([a-zA-Z0-9]+/)*[a-zA-Z0-9]+/?$", value):
+        raise typer.BadParameter("[Invalid category path] Category path must be in 'xx/yy/zz format.'")
+
+    if value.endswith('/'):
+        value =value[:-1]
+        
+    if value == 'none':
+        raise typer.BadParameter("Sorry, 'none' is a reserved category name.")
+    return value
+
+
+@app.command("showcat")
 def show_categories():
     cats_dict = category_api.get_categories()
+    print(cats_dict)
     text = Align.center("[bold red]Task Categories[/bold red]")
     display_utils.center_print(text, constants.DISPLAY_TERMINAL_COLOR_TITLE)
     display_utils.display_categories(cats_dict)
@@ -27,8 +47,8 @@ def show_categories():
 
 @app.command("addcat")
 def add_category(
-    cat: str = typer.Argument(..., help="Category name - xx/yy/zz.."),
-    color: str = typer.Option("yellow", "-c", "--color", help="Color for category")
+    cat: str = typer.Argument(..., help="Category path - xx/yy/zz..", callback=category_callback),
+    color: str = typer.Option(None, "-c", "--color", help="Color for category")
 ):
     resp = category_api.add_category(cat, color)
     if resp.status_code == 201:
@@ -47,7 +67,7 @@ def remove_category(cat: str = typer.Argument(..., help="Category path - xx/yy/z
     confirm_rm = typer.confirm(f"[WARNING] Are you sure to delete '{cat}'?\nAll the subdirectories will also be deleted.")
     if not confirm_rm:
         exit(0)
-    
+        
     resp = category_api.remove_category(cat)
     if resp.status_code == 204:
         display_utils.center_print(f"Deleted {cat} successfully.", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)

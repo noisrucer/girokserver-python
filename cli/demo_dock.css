@@ -1,0 +1,65 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+#app-calendar {
+  layout: horizontal;
+}
+
+#sidebar-container {
+  height: 100%;
+  width: 2fr;
+  border: solid grey;
+}
+
+#sidebar-header {
+  /* border: solid grey; */
+  content-align: center middle;
+}
+
+#sidebar-main-container {
+  height: 12fr;
+  margin-bottom: -10;
+}
+
+#calendar-container {
+  height: 100%;
+  width: 10fr;
+  border: solid grey;
+}
+
+#calendar-header {
+  content-align: center middle;
+  color: cadetblue;
+}
+
+/* #calendar-main-container {
+  layout: grid;
+  grid-size: 7 5;
+  grid-columns: 1fr;
+  grid-rows: 1fr;
+  height: 10fr;
+  outline: solid grey;
+} */
+
+.vertical {
+  width: 1fr;
+  border: solid grey;
+}
+
+.calendar-cell {
+  height: 1fr;
+  border-top: solid grey;
+  /* background: grey; */
+}
+
+.weekday-name {
+  content-align: center middle;
+  color: antiquewhite;
+}
+
+.test {
+  color: red;
+  margin-left: 1;
+}
