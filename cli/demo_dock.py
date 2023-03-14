@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical
 from textual.widgets import Button, Footer, Header, Static, Label, Placeholder, Tree
+from textual.widget import Widget
 from textual.messages import Message
 from textual import log
 
@@ -9,18 +12,28 @@ import utils.calendar as calendar_utils
 from rich.table import Table
 
 from calendar_app import CalendarApp
-from calendar_container import CalendarContainer
+from calendar_container import CalendarContainer, Calendar
+from sidebar import CategoryTree
 
-        
+class Hello(Widget):
+    can_focus: True
+    can_focus_children = True
+    def compose(self):
+        yield Static("hello")
 
 class Entry(App):
     CSS_PATH = "./demo_dock.css"
     BINDINGS = [
         ("q", "quit", "Quit Nuro"),
-        ("y", "show_previous_month", "Show prev month"),
-        ("u", "show_next_month", "Show next month")
+        ("u", "show_previous_month", "Show prev month"),
+        ("i", "show_next_month", "Show next month"),
+        ("y", "show_current_month", "Show current month"),
+        ("ctrl+l", "focus_on_calendar", "Move to calendar"),
+        ("ctrl+g", "focus_on_sidebar", "Move to sidebar")
     ]
-
+    def on_mount(self):
+        self.set_focus(self.query_one(CategoryTree))
+        
     def compose(self):
         yield CalendarApp()
         yield Footer()
@@ -35,6 +48,21 @@ class Entry(App):
     def action_show_previous_month(self):
         calendar_container = self.query_one(CalendarContainer)
         calendar_container.update_month_by_offset(-1)
+        
+    def action_show_current_month(self):
+        calendar_container = self.query_one(CalendarContainer)
+        now = datetime.now()
+        cur_year, cur_month = now.year, now.month
+        calendar_container.update_year_and_month(cur_year, cur_month)
+        
+    def action_focus_on_calendar(self):
+        self.set_focus(self.query_one(Calendar))
+        log("CTRL L", self.focused)
+        
+    def action_focus_on_sidebar(self):
+        self.set_focus(self.query_one(CategoryTree))
+        log("CTRL H", self.focused)
+        
         
         
                 

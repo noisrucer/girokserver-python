@@ -15,7 +15,7 @@ def build_category_tree(parent, cats):
             
 
 def get_full_path_from_node(node):
-    if str(node.label) == "Categories":
+    if str(node.label) == "All Categories":
         return ""
     node_name = str(node.label)
     parent_path = get_full_path_from_node(node.parent)

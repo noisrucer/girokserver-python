@@ -89,10 +89,17 @@ def build_time_window_by_month_offset(month_offset: int):
 
 def build_current_month_time_window():
     now = datetime.now()
-    current_year, current_month = now.year, now.month
-    start_date = f"{current_year}-{current_month}-01 00:00:00"
+    year, month = now.year, now.month
+    start_date = f"{year}-{month}-01 00:00:00"
     last_day_of_current_month = get_last_day_of_current_month()
-    end_date = f"{current_year}-{current_month}-{last_day_of_current_month} 11:59:59"
+    end_date = f"{year}-{month}-{last_day_of_current_month} 11:59:59"
+    return start_date, end_date
+
+
+def build_time_window_by_year_and_month(year=None, month=None):
+    start_date = f"{year}-{month}-01 00:00:00"
+    last_day_of_current_month = monthrange(year, month)[1]
+    end_date = f"{year}-{month}-{last_day_of_current_month} 11:59:59"
     return start_date, end_date
     
 
@@ -103,6 +110,9 @@ def get_year_and_month_by_month_offset(month_offset: int, year=None, month=None)
     new_months = (year * 12 + month + month_offset)
     new_year = new_months // 12
     new_month = new_months % 12
+    if new_month == 0: # (1 - 1) % 12 = 0.
+        new_year -= 1
+        new_month = 12
     return new_year, new_month
 
 
@@ -146,6 +156,6 @@ def get_month_name_by_number(month_num: int, abbr=False):
     month_num: 0 ~ 11
     """
     if abbr:
-        return calendar.month_name[month_num + 1]
+        return calendar.month_name[month_num]
     else:
-        return calendar.month_abbr[month_num + 1]
+        return calendar.month_abbr[month_num]

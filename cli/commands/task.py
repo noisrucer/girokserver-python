@@ -425,26 +425,7 @@ def show_task(
         current_date = task_utils.build_date_info(datetime.now())
         display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
         print(task_tree)
-        # app = StopwatchApp()
-        # app.run()
-        # layout.split_row(
-        #     Layout(name="left"),
-        #     Layout(name="right")
-        # )
-        # layout["left"].split_column(
-        #     Layout(name="title"),
-        #     Layout(name="task", ratio=8)
-        # )
-        # layout['title'].size = None
-        # layout['title'].size = 0.5
-        # layout['title'].update(Panel("Category", border_style="blue"))
-        # layout['task'].update(Panel(task_tree, border_style="red"))
-        # # def onkeypress(event):
-        # #     if event.name == 'q':
-        # #         exit(0)
-        # with Live(layout, screen=True) as live:
-        #     while True:
-        #         sleep(1)
+
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
         display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)

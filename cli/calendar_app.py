@@ -11,9 +11,6 @@ from textual import log
 
 from sidebar import SidebarContainer
 from calendar_container import CalendarContainer
-
-
-        
         
 class CalendarApp(Horizontal):
     CSS_PATH = "./demo_dock.css"
