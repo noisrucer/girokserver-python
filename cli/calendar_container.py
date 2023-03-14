@@ -69,12 +69,13 @@ class Calendar(Static):
             end_date=end_date,
             min_pri=None,
             max_pri=None,
-            tag=None
+            tag=None,
+            view="list"
         )
         
         if resp.status_code == 200:
             tasks = general_utils.bytes2dict(resp.content)['tasks']
-            task_tree = display_utils.display_tasks_by_category(tasks)
+            # task_tree = display_utils.display_tasks_by_category(tasks)
         elif resp.status_code == 400:
             err_msg = general_utils.bytes2dict(resp.content)['detail']
             exit(err_msg)
@@ -82,7 +83,7 @@ class Calendar(Static):
         else:
             # self.exit(resp)
             exit(resp)
-        self.update(task_tree)
+        self.update(str(tasks))
         # self.update(f"{self.year} {self.month} {self.cat_path} {tasks}")
         
         

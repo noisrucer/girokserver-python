@@ -19,7 +19,8 @@ def get_tasks(
     end_date: Union[str, None] = None,
     min_pri: Union[int, None] = None,
     max_pri: Union[int, None] = None,
-    tag: Union[str, None] = None
+    tag: Union[str, None] = None,
+    view: str = "category"
 ):
     query_str_obj = {
         "category": cats,
@@ -27,7 +28,8 @@ def get_tasks(
         "end_date": end_date,
         "min_pri": min_pri,
         "max_pri": max_pri,
-        "tag": tag
+        "tag": tag,
+        "view": view
     }
     
     resp = requests.get(
