@@ -2,12 +2,14 @@ from typing import Union, List, Dict
 from pydantic import BaseModel
     
 
+class CategoryIn(BaseModel):
+    user_email: str
+
 class CategoryOut(BaseModel):
     resp: Dict[str, dict]
     
-    
 class CategoryCreateIn(BaseModel):
-    color: str
+    color: Union[str, None]
     names: List[str]
     
 
@@ -28,3 +30,8 @@ class CategoryRenameIn(BaseModel):
 class CategoryMoveIn(BaseModel):
     cats: List[str]
     new_parent_cats: List[str]
+    
+class LastCategoryIdIn(BaseModel):
+    cats: List[str]
+    
+    
