@@ -19,8 +19,13 @@ def get_password_by_email(db: Session, email: EmailStr):
     return user.password
 
 
-def get_pending_user_by_email(db: Session, email: EmailStr):
-    user = db.query(user_models.PendingRegistration).filter(user_models.PendingRegistration.email == email).first()
+def get_current_active_user(db: Session, is_activate: bool):
+    user = db.query(user_models.User).filter(user_models.User.is_activate == is_activate).first()
+    return user
+
+
+def check_code(db:Session, verification_code: str):
+    user = db.query(user_models.User).filter(user_models.User.verification_code==verification_code).first()
     return user
 
 

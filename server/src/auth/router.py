@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, status, Depends, BackgroundTasks
+from fastapi import APIRouter, status, Depends, BackgroundTasks, HTTPException
 from email_validator import validate_email, EmailNotValidError
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -26,67 +26,61 @@ router = APIRouter(
 )
 
 
-@router.post('/register/verify_email', status_code=status.HTTP_200_OK)
-async def verify_email(user: schemas.UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+@router.post('/register', status_code=status.HTTP_201_CREATED, response_model=schemas.UserCreateOut)
+async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     user_dict = user.dict()
     
     # Check if there's a duplicated email in the DB
-    if service.get_user_by_email(db, email=user_dict['email']):
+    if service.get_user_by_email(db, email=user_dict['email']) and service.get_current_active_user(db, is_activate=True):
         raise exceptions.EmailAlreadyExistsException(email=user_dict['email'])
     
-    if service.get_pending_user_by_email(db, email=user_dict['email']):
-        pending_registration = db.query(user_models.PendingRegistration).filter(user_models.PendingRegistration.email==user_dict['email']).first()
-        db.delete(pending_registration)
+    if service.get_user_by_email(db, email=user_dict['email']):
+        update_user = db.query(user_models.User).filter(user_models.User.email==user_dict['email']).first()
+        db.delete(update_user)
         db.commit()
-    
-    try:
-        validation = validate_email(user_dict['email'])
-        email = validation.email
-    except EmailNotValidError as e:
-        raise exceptions.EmailNotValidException()
     
     # Send verification code
     verification_code = utils.generate_verification_code(len=6)
-    recipient = email
+    recipient = user_dict['email']
     subject="[Girok] Please verify your email address"
     content = utils.read_html_content_and_replace(
         replacements={"__VERIFICATION_CODE__": verification_code},
         html_path="server/src/email/verification.html"
     )
     background_tasks.add_task(glob_utils.send_email, recipient, content, subject)
+    user_dict.update(verification_code=verification_code)
     
     # Hash password
     hashed_password = utils.hash_password(user_dict['password'])
     user_dict.update(password=hashed_password)
-    user_dict.update(verification_code=verification_code)
     
-    pending_user = user_models.PendingRegistration(**user_dict)
-    
-    db.add(pending_user)
-    db.commit()
-    
-    return {"status": "successful", "verification_token": verification_code}
-
-
-@router.post("/register/{verification_code}", status_code=status.HTTP_201_CREATED, response_model=schemas.UserCreateOut)
-async def register(verification_code: str, db: Session = Depends(get_db)):
-    pending_registration = db.query(user_models.PendingRegistration).filter(verification_code==verification_code).first()
-    
-    # Check if there's a duplicated email in the DB
-    if service.get_user_by_email(db, email=pending_registration.email):
-        raise exceptions.EmailAlreadyExistsException(email=pending_registration.email)
-    
-    user_dict = {"email": pending_registration.email,
-                 "password": pending_registration.password}
-
-    # Save to DB
     new_user = user_models.User(**user_dict)
-    db.add(new_user)
-    db.delete(pending_registration)
+    db.add(new_user) 
     db.commit()
     db.refresh(new_user)
     
     return new_user
+
+
+@router.post("/register/verification_code", status_code=status.HTTP_200_OK)
+async def verify_code(code: schemas.VerificationCode, db: Session = Depends(get_db)):
+    verification_code = code.dict()
+    
+    user = db.query(user_models.User).filter(user_models.User.verification_code==verification_code['verification_code']).first()
+    
+    if not service.get_user_by_email(db, email=user.email):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    
+    if not service.check_code(db, verification_code=user.verification_code):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    
+    user.is_activate = True
+    
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    
+    return "Email authentication is complete."
 
 
 @router.post('/login', response_model=schemas.Token)
