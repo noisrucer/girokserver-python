@@ -75,10 +75,9 @@ async def verify_email(user: schemas.VerificationCode, db: Session = Depends(get
     if service.get_current_active_user(db ,email=user_dict['email'], is_activate=True):
         raise exceptions.EmailAlreadyExistsException(email=user_dict['email'])   
     
-    if utils.verify_code(user_dict['verification_code'], user.verification_code):
+    if not utils.verify_code(user_dict['verification_code'], user.verification_code):
         return False
 
-    
     user.is_activate = True
     
     db.add(user)
