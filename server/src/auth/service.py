@@ -19,14 +19,8 @@ def get_password_by_email(db: Session, email: EmailStr):
     return user.password
 
 
-def get_current_active_user(db: Session, is_activate: bool):
-    user = db.query(user_models.User).filter(user_models.User.is_activate == is_activate).first()
-    return user
-
-
-def check_code(db:Session, verification_code: str):
-    user = db.query(user_models.User).filter(user_models.User.verification_code==verification_code).first()
-    return user
+def get_current_active_user(db: Session, email: EmailStr, is_activate: bool):
+    return db.query(user_models.User).filter(user_models.User.email == email, user_models.User.is_activate == is_activate).first()
 
 
 def authenticate_user(db: Session, email: str, password: str):

@@ -23,7 +23,9 @@ class UserCreateOut(user_schemas.UserBase):
 
 
 class VerificationCode(BaseModel):
+    email: str
     verification_code: str = Field(default=..., max_length=6)
+    
 
 
 class VerifyEmail(BaseModel):

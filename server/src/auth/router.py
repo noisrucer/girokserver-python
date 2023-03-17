@@ -15,6 +15,7 @@ import server.src.auth.utils as utils
 import server.src.dependencies as glob_dependencies
 import server.src.utils as glob_utils
 import server.src.user.models as user_models
+import server.src.user.schemas as user_schemas
 from server.src.auth.config import get_jwt_settings
 
 
@@ -31,10 +32,10 @@ async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, 
     user_dict = user.dict()
     
     # Check if there's a duplicated email in the DB
-    if service.get_user_by_email(db, email=user_dict['email']) and service.get_current_active_user(db, is_activate=True):
-        raise exceptions.EmailAlreadyExistsException(email=user_dict['email'])
+    if service.get_current_active_user(db ,email=user_dict['email'], is_activate=True):
+        raise exceptions.EmailAlreadyExistsException(email=user_dict['email'])   
     
-    if service.get_user_by_email(db, email=user_dict['email']):
+    if service.get_current_active_user(db ,email=user_dict['email'], is_activate=False):
         update_user = db.query(user_models.User).filter(user_models.User.email==user_dict['email']).first()
         db.delete(update_user)
         db.commit()
@@ -48,7 +49,10 @@ async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, 
         html_path="server/src/email/verification.html"
     )
     background_tasks.add_task(glob_utils.send_email, recipient, content, subject)
-    user_dict.update(verification_code=verification_code)
+    
+    # Hash verification code
+    hashed_verification_code = utils.hash_verification_code(verification_code)
+    user_dict.update(verification_code=hashed_verification_code)
     
     # Hash password
     hashed_password = utils.hash_password(user_dict['password'])
@@ -63,16 +67,17 @@ async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, 
 
 
 @router.post("/register/verification_code", status_code=status.HTTP_200_OK)
-async def verify_code(code: schemas.VerificationCode, db: Session = Depends(get_db)):
-    verification_code = code.dict()
+async def verify_email(user: schemas.VerificationCode, db: Session = Depends(get_db)):
+    user_dict = user.dict()
     
-    user = db.query(user_models.User).filter(user_models.User.verification_code==verification_code['verification_code']).first()
+    user = db.query(user_models.User).filter(user_models.User.email == user_dict['email']).first()
     
-    if not service.get_user_by_email(db, email=user.email):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    if service.get_current_active_user(db ,email=user_dict['email'], is_activate=True):
+        raise exceptions.EmailAlreadyExistsException(email=user_dict['email'])   
     
-    if not service.check_code(db, verification_code=user.verification_code):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    if utils.verify_code(user_dict['verification_code'], user.verification_code):
+        return False
+
     
     user.is_activate = True
     

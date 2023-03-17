@@ -25,6 +25,14 @@ def generate_verification_code(len=6):
         random.choice(string.ascii_uppercase + string.digits) for _ in range(len))
 
 
+def hash_verification_code(raw_verification_code):
+    return pwd_context.hash(raw_verification_code)
+
+
+def verify_code(raw_verification_code, hashed_verification_code):
+    return pwd_context.verify(raw_verification_code, hashed_verification_code)
+
+
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
     to_encode = data.copy()
     if expires_delta:
