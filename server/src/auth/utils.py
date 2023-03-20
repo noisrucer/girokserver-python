@@ -37,7 +37,7 @@ def verify_code(raw_verification_code, hashed_verification_code):
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = timedelta(minutes=jwt_settings.ACCESS_TOKEN_EXPIRE_MINUTES) + datetime.utcnow() 
+    expire = datetime.utcnow() + timedelta(minutes=jwt_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({
         "exp": expire
     })
@@ -47,7 +47,7 @@ def create_access_token(data: dict):
 
 def create_refresh_token(data: dict):
     to_encode = data.copy()
-    expire = timedelta(minutes=jwt_settings.REFRESH_TOKEN_EXPIRE_MINUTES) + datetime.utcnow()        
+    expire = datetime.utcnow() + timedelta(minutes=jwt_settings.REFRESH_TOKEN_EXPIRE_MINUTES)        
     to_encode.update({
         "exp": expire
     })

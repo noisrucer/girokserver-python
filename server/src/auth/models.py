@@ -9,6 +9,6 @@ class RefreshToken(Base):
     __tablename__ = "refresh_token"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("user.user_id", ondelete="CASCADE"), unique=True)
+    email = Column(String(100), ForeignKey("user.email", ondelete="CASCADE"), unique=True)
     refresh_token = Column(String(500), nullable=False)
     create_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))

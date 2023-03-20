@@ -97,7 +97,7 @@ async def login(
     if not user:
         raise exceptions.InvalidEmailOrPasswordException()
     
-    refresh_token_check = db.query(models.RefreshToken).filter(models.RefreshToken.user_id==user.user_id)
+    refresh_token_check = db.query(models.RefreshToken).filter(models.RefreshToken.email==user.email)
     if refresh_token_check.first():
         refresh_token_check.delete()
         db.commit()
@@ -106,7 +106,7 @@ async def login(
     refresh_token = utils.create_refresh_token(data={"sub": user.email})
     
     refresh_token_dict = {
-        "user_id": user.user_id,
+        "email": user.email,
         "refresh_token": refresh_token
     }
     
@@ -121,11 +121,11 @@ async def login(
         }
 
 
-@router.get("/refresh", status_code=status.HTTP_200_OK, response_model=schemas.Token)
+@router.get("/refresh", status_code=status.HTTP_200_OK, dependencies=[Depends(glob_dependencies.get_current_user)], response_model=schemas.Token)
 async def get_new_access_token(token: str):
-    refresh_data = utils.verify_refresh_token(token)
+    token_data = utils.verify_refresh_token(token)
     
-    new_access_token = utils.create_access_token(refresh_data.dict())
+    new_access_token = utils.create_access_token(data={"sub": token_data.username})
     
     return {
         "access_token": new_access_token,
