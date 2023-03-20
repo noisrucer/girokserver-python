@@ -130,7 +130,7 @@ async def get_new_access_token(token: str):
     return {
         "access_token": new_access_token,
         "refresh_token": token,
-        "token_type": "Bearer",
+        "token_type": "Bearer", 
     }
 
 
