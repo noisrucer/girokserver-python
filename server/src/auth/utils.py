@@ -5,6 +5,8 @@ from jose import jwt, JWTError
 from typing import Union
 from datetime import datetime, timedelta
 
+import server.src.auth.exceptions as exceptions
+import server.src.auth.schemas as schemas
 from server.src.auth.config import get_jwt_settings
 
 jwt_settings = get_jwt_settings()
@@ -33,39 +35,55 @@ def verify_code(raw_verification_code, hashed_verification_code):
     return pwd_context.verify(raw_verification_code, hashed_verification_code)
 
 
-def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
+def create_access_token(data: dict):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=30)
-        
+    expire = timedelta(minutes=jwt_settings.ACCESS_TOKEN_EXPIRE_MINUTES) + datetime.utcnow() 
     to_encode.update({
         "exp": expire
     })
-    encoded_jwt = jwt.encode(to_encode, jwt_settings.SECRET_KEY, algorithm=jwt_settings.ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, jwt_settings.ACCESS_SECRET_KEY, algorithm=jwt_settings.ALGORITHM)
     return encoded_jwt
 
 
-# def create_refresh_token(data: dict, expires_delta: Union[timedelta, None] = None):
-#     to_encode = data.copy()
-#     if expires_delta:
-#         expire = datetime.utcnow() + expires_delta
-#     else:
-#         expire = datetime.utcnow() + timedelta(minutes=60*24*7)
+def create_refresh_token(data: dict):
+    to_encode = data.copy()
+    expire = timedelta(minutes=jwt_settings.REFRESH_TOKEN_EXPIRE_MINUTES) + datetime.utcnow()        
+    to_encode.update({
+        "exp": expire
+    })
+    encoded_jwt = jwt.encode(to_encode, jwt_settings.REFRESH_SECRET_KEY, algorithm=jwt_settings.ALGORITHM)
+    return encoded_jwt
+
+
+def verify_refresh_token(token: str):
+    try:
+        user_email = decode_refresh_jwt(token)
         
-#     to_encode.update({
-#         "exp": expire
-#     })
-#     encoded_jwt = jwt.encode(to_encode, jwt_settings.SECRET_KEY, algorithm=jwt_settings.ALGORITHM)
-#     return encoded_jwt
+        if user_email is None:
+            raise exceptions.CredentialsException()
+        token_data = schemas.TokenData(username=user_email)
+    except JWTError:
+        raise exceptions.CredentialsException()
+    
+    return token_data
 
 
-def decode_jwt(token):
-    payload = jwt.decode(token, jwt_settings.SECRET_KEY, algorithms=[jwt_settings.ALGORITHM])
+def get_new_access_token(token: str):
+    token_data = verify_refresh_token(token)
+    return create_access_token(token_data)
+
+
+def decode_access_jwt(token):
+    payload = jwt.decode(token, jwt_settings.ACCESS_SECRET_KEY, algorithms=[jwt_settings.ALGORITHM])
     email: str = payload.get("sub")
     return email
-    
+
+
+def decode_refresh_jwt(token):
+    payload = jwt.decode(token, jwt_settings.REFRESH_SECRET_KEY, algorithms=[jwt_settings.ALGORITHM])
+    email: str = payload.get("sub")
+    return email
+
     
 def read_html_content_and_replace(
     replacements: dict[str, str],

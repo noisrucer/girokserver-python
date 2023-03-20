@@ -27,7 +27,6 @@ class VerificationCode(BaseModel):
     verification_code: str = Field(default=..., max_length=6)
     
 
-
 class VerifyEmail(BaseModel):
     email: str
     
@@ -43,6 +42,7 @@ class VerifyEmail(BaseModel):
     
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
 
 

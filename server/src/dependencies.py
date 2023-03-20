@@ -20,7 +20,7 @@ async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)):
     try:
-        user_email = utils.decode_jwt(token)
+        user_email = utils.decode_access_jwt(token)
         if user_email is None:
             raise exceptions.CredentialsException()
         token_data = schemas.TokenData(username=user_email)

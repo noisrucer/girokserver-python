@@ -34,7 +34,7 @@ def authenticate_user(db: Session, email: str, password: str):
     if not user:
         return False
     if not utils.verify_password(password, user.password):
-        return False
+        raise exceptions.InvalidEmailOrPasswordException()
     return user
     
     
