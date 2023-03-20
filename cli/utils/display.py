@@ -1,14 +1,20 @@
 from datetime import datetime
+import calendar
 
 from rich import print
 from rich.console import Console
-from rich.padding import Padding
 from rich.tree import Tree
 from rich.align import Align
-from rich.layout import Layout
+from rich import box
+from rich.style import Style
+from rich.table import Table, Column
+from rich.text import Text
+from rich.align import Align
 import shutil
 
 import utils.task as task_utils
+import utils.calendar as calendar_utils
+import constants
 
 console = Console()
 
@@ -20,9 +26,9 @@ def display_categories(cats_dict: dict, highlight_cat=None):
             cat,
             top_most=True,
             tree=tree,
-            icon=f":keycap_{idx+1}:",
             cumul_path=cat,
-            highlight_cat=highlight_cat
+            highlight_cat=highlight_cat,
+            color=cats_dict[cat]['color']
         )
     console.print(tree)
     
@@ -32,20 +38,34 @@ def display_category(
     cat: str,
     top_most=True,
     tree: Tree=None,
-    icon=None,
     cumul_path="",
-    highlight_cat=None
+    highlight_cat=None,
+    color=None,
 ):
-    cat_txt = f"[green]{cat}[/green]" if highlight_cat == cumul_path else cat
-    tree = tree.add(f"{icon + '  ' + '[yellow]' if top_most else ''}{cat_txt}")
-    for sub in cats_dict[cat].keys():
+    style = Style(
+        color=constants.TABLE_HEADER_COLOR if highlight_cat != cumul_path else "#B9D66A",
+        bold=True
+    )
+    # if not top_most:
+    #     style = Style(color=constants.TABLE_TASK_NAME_COLOR, bold=True)
+        
+    # if top_most:
+    circle = Text(constants.CIRCLE_EMOJI + " ", style=Style(color=constants.CIRCLE_COLOR[color]))
+        
+    dir_name = Text(f"{cat}", style=style)
+    # if top_most:
+    dir_name = Text.assemble(circle, dir_name)
+        
+    tree = tree.add(dir_name)
+    for sub in cats_dict[cat]['subcategories'].keys():
         display_category(
-            cats_dict[cat],
+            cats_dict[cat]['subcategories'],
             sub,
             top_most=False,
             tree=tree,
             cumul_path=cumul_path + "/" + sub,
-            highlight_cat=highlight_cat
+            highlight_cat=highlight_cat,
+            color=color
         )
         
     
@@ -64,26 +84,37 @@ def center_print(text, style: str = None, wrap: bool = False) -> None:
     console.print(Align.center(text, style=style, width=width), height=100)
     
     
-def display_tasks_by_category(task_tree):
+def display_tasks_by_category(task_tree, color_dict):
+    # print(task_tree)
     tree = Tree("")
     for idx, cat_name in enumerate(task_tree):
         tree.add(display_category_with_tasks(
             cat_name=cat_name,
             task_tree=task_tree[cat_name],
-            icon=f":keycap_{idx+1}:"
+            color_dict=color_dict,
+            top_most=True
             ))
     return tree
 
 
-def display_category_with_tasks(cat_name, task_tree: dict, icon=None):
-    tree = Tree(f"{icon+'  ' if icon else ''}[yellow]{cat_name}[/yellow]")
+def display_category_with_tasks(cat_name, task_tree: dict, color_dict, top_most):
+    dir_name = Text(f"{cat_name}", style=Style(color=constants.TABLE_HEADER_COLOR, bold=True))
+    dir_name = Text.assemble(
+        Text(f"{constants.CIRCLE_EMOJI} ", style=Style(color=constants.CIRCLE_COLOR[color_dict[cat_name]])),
+        dir_name
+    )
+        
+    tree = Tree(dir_name)
+    
     for sub_cat_name in task_tree['sub_categories']:
         sub_tree = display_category_with_tasks(
             cat_name=sub_cat_name,
             task_tree=task_tree['sub_categories'][sub_cat_name],
-            icon=None
+            color_dict=color_dict,
+            top_most=False
         )
         tree.add(sub_tree)
+        
     for task in task_tree['tasks']:
         deadline = datetime.strptime(task['deadline'], "%Y-%m-%dT%H:%M:%S")
         year, month, day = deadline.year, deadline.month, deadline.day
@@ -100,10 +131,60 @@ def display_category_with_tasks(cat_name, task_tree: dict, icon=None):
         day_offset_message = f"{remaining_days} days left" if remaining_days > 0 else f"{abs(remaining_days)} days passed"
         if remaining_days == 0:
             day_offset_message = "Due Today"
-        tree.add(f"[green][{weekday_name}, {day} {month_name}{time}][/green] [red]{task['name']}[/red] [{day_offset_message}]")
+        
+        # task_prefix = Text(constants.CIRCLE_EMOJI + " ", style=Style(color=constants.CIRCLE_COLOR[task['color']]))
+        task_id = Text(f"[{str(task['task_id'])}] ", style=Style(color="white"))
+        task_name = Text(task['name'], style=Style(color=constants.TABLE_TASK_NAME_COLOR, bold=True))
+        task_remaining_days = Text(f" [{day_offset_message}]", style=Style(color='#F5F7F2'))
+        task_date = Text(f" - {year}/{month}/{day} {weekday_name}", style=Style(color="white"))
+        node_name = Text.assemble(task_id, task_name, task_remaining_days, task_date)
+        tree.add(node_name)
+        # tree.add(f"[red]{task['name']}[/red] [{year}/{month}/{day} {weekday_name}, {day_offset_message}]")
 
     return tree        
             
+            
+            
+def display_tasks_by_list(tasks: list, marked_task_id: int = None, color: str = constants.TABLE_TASK_DELETED_COLOR):
+    table = build_task_table(tasks, marked_task_id, color)
+    print(Align(table, align="center"))
+    
+    
+def build_task_table(tasks: list, marked_task_id: int = None, color: str = constants.TABLE_TASK_DELETED_COLOR):
+    tasks = sorted(tasks, key=lambda x: calendar_utils.get_date_obj_from_str_separated_by_T(x['deadline']))
+    table = Table(
+        Column(header="ID", justify="center", header_style=Style(color=constants.TABLE_HEADER_COLOR), style=Style(color=constants.TABLE_TASK_NAME_COLOR)),
+        Column(header="Name", header_style=Style(color=constants.TABLE_HEADER_COLOR), style=Style(color=constants.TABLE_TASK_NAME_COLOR)),
+        Column(header="Category", justify="center", header_style=Style(color=constants.TABLE_HEADER_COLOR), style=Style(color=constants.TABLE_TEXT_COLOR)),
+        Column(header="Deadline", justify="center", header_style=Style(color=constants.TABLE_HEADER_COLOR), style=Style(color="green")),
+        Column(header="Tag", justify="center", header_style=Style(color=constants.TABLE_HEADER_COLOR), style=Style(color=constants.TABLE_TEXT_COLOR)),
+        Column(header="Priority", justify="center", header_style=Style(color=constants.TABLE_HEADER_COLOR), style=Style(color=constants.TABLE_TEXT_COLOR)),
+        Column(header="Remaining", justify="center", header_style=Style(color=constants.TABLE_HEADER_COLOR), style=Style(color=constants.TABLE_TEXT_COLOR)),
+        box=box.SIMPLE_HEAVY,
+        show_lines=True,
+        border_style=Style(color="#D7E1C9", bold=True)
+    )
+    for i, task in enumerate(tasks):
+        date = calendar_utils.get_date_obj_from_str_separated_by_T(task['deadline'])
+        deadline = f"{date.day} {calendar.month_name[date.month]} {date.year}"
+        remaining_days = task_utils.get_day_offset_between_two_dates(datetime.now(), date)
+        day_offset_message = f"{remaining_days} days left" if remaining_days > 0 else f"{abs(remaining_days)} days passed"
+        if remaining_days == 0:
+            day_offset_message = "Due Today"
+        circle = Text(constants.CIRCLE_EMOJI + " ", style=Style(color=constants.CIRCLE_COLOR[task['color']]))
+        task_name = Text.assemble(circle, task['name'], style=Style(color=color if marked_task_id == task['task_id'] else constants.TABLE_TASK_NAME_COLOR, bold=True))
+        
+        table.add_row(
+            Text(str(task['task_id']), style=Style(color=color if marked_task_id == task['task_id'] else constants.TABLE_TEXT_COLOR)),
+            task_name,
+            Text(task['task_category_full_path'] if task['task_category_full_path'] else "None", style=Style(color=color if marked_task_id == task['task_id'] else constants.TABLE_TEXT_COLOR)),
+            Text(deadline, style=Style(color=color if marked_task_id == task['task_id'] else constants.TABLE_DEADLINE_COLOR)),
+            Text(task['tag'] if task['tag'] else '-', style=Style(color=color if marked_task_id == task['task_id'] else constants.TABLE_TEXT_COLOR)),
+            Text(str(task['priority']) if task['priority'] else '-', style=Style(color=color if marked_task_id == task['task_id'] else constants.TABLE_TEXT_COLOR)),
+            Text(day_offset_message, style=Style(color=color if marked_task_id == task['task_id'] else constants.TABLE_TEXT_COLOR))
+        )
+        
+    return table
     
 
     

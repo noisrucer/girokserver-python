@@ -114,3 +114,18 @@ def get_category_color(cat_id: int):
         display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
         exit(0)
     
+    
+def get_color_dict():
+    resp = requests.get(
+        cfg.base_url + "/categories/color",
+        headers=auth_utils.build_jwt_header(cfg.config_path)
+    )
+    if resp.status_code == 200:
+        color_dict = general_utils.bytes2dict(resp.content)
+        return color_dict
+    elif resp.status_code == 400:
+        err_msg = general_utils.bytes2dict(resp.content)['detail']
+        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+    else:
+        display_utils.center_print("Error occurred.", constants.DISPLAY_TERMINAL_COLOR_ERROR)
+    

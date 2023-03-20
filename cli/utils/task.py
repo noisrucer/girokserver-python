@@ -156,6 +156,6 @@ def get_month_name_by_number(month_num: int, abbr=False):
     month_num: 0 ~ 11
     """
     if abbr:
-        return calendar.month_name[month_num]
-    else:
         return calendar.month_abbr[month_num]
+    else:
+        return calendar.month_name[month_num]
