@@ -56,3 +56,9 @@ class Tag(BaseModel):
 class TagOut(BaseModel):
     tags: List[str]
     
+
+class ChangeTaskTagIn(BaseModel):
+    new_tag_name: str
+
+class ChangeTaskPriorityIn(BaseModel):
+    new_priority: int = Field(gt=1, le=5)

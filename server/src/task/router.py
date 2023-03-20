@@ -63,18 +63,13 @@ async def get_tasks(
         description="End date. Ex. '2023-03-23 12:00:00'",
         regex="^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{2}:[0-9]{2}:[0-9]{2}$"
     ),
-    min_pri: Union[int, None] = Query(
+    priority: Union[int, None] = Query(
         default=None,
-        title="Minimum priority",
+        title="Priority",
         ge=1,
         le=5
     ),
-    max_pri: Union[int, None] = Query(
-        default=None,
-        title="Maximum priority",
-        ge=1,
-        le=5
-    ),
+    no_priority: bool = False,
     tag: Union[str, None] = Query(
         default=None,
         title="Tag"
@@ -87,14 +82,6 @@ async def get_tasks(
     current_user: user_models.User = Depends(glob_dependencies.get_current_user)
 ):
     user_id = current_user.user_id
-    
-    # min_pri and max_pri must be both None or int 
-    if bool(min_pri) ^ bool(max_pri):
-        raise exceptions.InvalidPriorityPairException()
-    
-    # Check min_pri <= max_pri
-    if all([min_pri, max_pri]) and min_pri > max_pri:
-        raise exceptions.InvalidPriorityWindowException()
         
     # Check start_date <= end_date
     start_date = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
@@ -118,8 +105,8 @@ async def get_tasks(
             cat_ids=cat_ids,
             start_date=start_date,
             end_date=end_date,
-            min_pri=min_pri,
-            max_pri=max_pri,
+            priority=priority,
+            no_priority=no_priority,
             tag=tag
         )
     elif view == task_enums.TaskView.list:
@@ -129,30 +116,63 @@ async def get_tasks(
             cat_ids=cat_ids,
             start_date=start_date,
             end_date=end_date,
-            min_pri=min_pri,
-            max_pri=max_pri,
+            priority=priority,
+            no_priority=no_priority,
             tag=tag
         )
     else:
         raise Exception("Invalid task view!")
-    
-    # resp = []
-    # for task in tasks:
-    #     task_data = {}
-    #     for col in task.__table__.columns:
-    #         if col.name == "task_category_id" and task.task_category_id is not None:
-    #             cat_full_path = category_service.get_category_full_path_by_id(db, user_id, task.task_category_id)
-    #             task_data["category_path"] = cat_full_path
-    #         if col.name == "deadline":
-    #             task_data["deadline"] = task.deadline.strftime("%Y-%m-%d %H:%M:%S")
-    #             continue
-    #         task_data[col.name] = getattr(task, col.name)
-    #     resp.append(task_data)
-    pprint.pprint(tasks)
         
     return {"tasks": tasks}
     
     
+@router.delete(
+    "/",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_task(
+    task_id: int = Query(
+        default=...,
+        title="Task ID to be deleted",
+        ge=1
+    ),
+    db: Session = Depends(get_db),
+    current_user: user_models.User = Depends(glob_dependencies.get_current_user)
+):
+    user_id = current_user.user_id
+    service.delete_task(db, user_id, task_id)
+    
+@router.patch(
+    '/{task_id}/tag',
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def change_task_tag(
+    task_id: int,
+    tag: schemas.ChangeTaskTagIn,
+    db: Session=Depends(get_db),
+    current_user: user_models.User = Depends(glob_dependencies.get_current_user) 
+):
+    user_id = current_user.user_id
+    tag = tag.dict()
+    new_tag_name = tag['new_tag_name']
+    service.change_task_tag(db, user_id, task_id, new_tag_name)
+
+@router.patch(
+    '/{task_id}/priority',
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def change_task_priority(
+    task_id: int,
+    priority: schemas.ChangeTaskPriorityIn,
+    db: Session=Depends(get_db),
+    current_user: user_models.User = Depends(glob_dependencies.get_current_user) 
+):
+    user_id = current_user.user_id
+    priority = priority.dict()
+    new_priority = priority['new_priority']
+    service.change_task_priority(db, user_id, task_id, new_priority)
+
+
 @router.get(
     '/tags',
     status_code=status.HTTP_200_OK,

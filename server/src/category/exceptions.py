@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+import server.src.category.constants as category_constants
 
 
 class CategoryAlreadyExistsException(HTTPException):
@@ -35,3 +36,14 @@ class CannotMoveToSameLocation(HTTPException):
     def __init__(self):
         self.status_code = status.HTTP_400_BAD_REQUEST
         self.detail = "[Warning] Circular reference prohibited."
+        
+        
+class CategoryColorException(HTTPException):
+    def __init__(self, cat_path, color, parent_cat_path, parent_color):
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = f"You have given {color} color for {cat_path}. However, {parent_cat_path} already has a color {parent_color}"
+        
+class CategoryColorNotExistException(HTTPException):
+    def __init__(self, color):
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = f"'{color}' is not a valid color. Please choose from {category_constants.CATEGORY_COLORS}."

@@ -1,5 +1,5 @@
 from typing import List
-
+from collections import defaultdict
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.orm import Session
 
@@ -11,6 +11,8 @@ import server.src.user.service as user_service
 import server.src.category.exceptions as exceptions
 import server.src.dependencies as glob_dependencies
 import server.src.category.constants as category_constants
+
+import pprint
 
 router = APIRouter(
     prefix="/categories",
@@ -26,10 +28,17 @@ async def get_all_categories(
     current_user: user_models.User = Depends(glob_dependencies.get_current_user)
 ):
     user_id = current_user.user_id
-    resp = dict()
+    resp = defaultdict(dict)
     cats = service.get_subcategories_by_parent_id(db, user_id=user_id, pid=None)
     for cat in cats:
-        resp[cat.name] = service.build_category_tree(db, user_id, cat.task_category_id)
+        resp[cat.name]["subcategories"] = service.build_category_tree(db, user_id, cat.task_category_id)
+        resp[cat.name]["color"] = cat.color
+        
+    resp['No Category'] = {
+        "color": "grey",
+        "subcategories": {}
+    }
+    
     return resp
 
 
@@ -44,34 +53,51 @@ async def create_category(
     current_user: user_models.User = Depends(glob_dependencies.get_current_user)
 ):
     category = category.dict()
-    '''
+    ''' Example
     category = {
         names: ['HKU', 'COMP3230', 'Assignment']
-        color: red
+        color: yellow
     }
     '''
     names = category['names']
     color = category['color']
-    print(color)
+    if color and color not in category_constants.CATEGORY_COLORS:
+        raise exceptions.CategoryColorNotExistException(color)
+        
     user_id = current_user.user_id
-    pid_of_last_cat, cumul_path = service.get_last_cat_id(db, user_id, names[:-1])
+    
+    pid_of_second_last_cat, cumul_path = service.get_last_cat_id(db, user_id, names[:-1])
     
     # If given, check if the subdirectory color is equal to the parent's color,
     if color is None:
-        if pid_of_last_cat is not None:
-            color = service.get_category_color_by_id(db, user_id, pid_of_last_cat) # set to parent's color
+        if pid_of_second_last_cat is not None:
+            color = service.get_category_color_by_id(db, user_id, pid_of_second_last_cat) # set to parent's color
         else:
-            color = category_constants.DEFAULT_CATEGORY_COLOR # If no color is given, set it to default
-        
+            # Select non-overlapping colors
+            existing_colors = set(service.get_all_category_colors(db, user_id).values())
+            for c in category_constants.CATEGORY_COLORS: # Assign color (lower index higher priority)
+                if c in existing_colors: 
+                    continue
+                color = c
+                break
+            if color is None: # If no available non-overlapping color, assign the default color
+                color = category_constants.DEFAULT_CATEGORY_COLOR
+    else:
+        if pid_of_second_last_cat is not None:
+            parent_color = service.get_category_color_by_id(db, user_id, pid_of_second_last_cat) 
+            if color != parent_color:
+                raise exceptions.CategoryColorException(names[-1], color, '/'.join(names[:-1]), parent_color)
+            
+    
     new_cat_name = names[-1]
-    dup_cat_id = service.get_category_id_by_name_and_parent_id(db, user_id, new_cat_name, pid_of_last_cat)
+    dup_cat_id = service.get_category_id_by_name_and_parent_id(db, user_id, new_cat_name, pid_of_second_last_cat)
     if dup_cat_id:
         raise exceptions.CategoryAlreadyExistsException(cumul_path, new_cat_name)
     
     new_cat_data = {
         "user_id": user_id,
         "name": new_cat_name,
-        "super_task_category_id": pid_of_last_cat,
+        "super_task_category_id": pid_of_second_last_cat,
         "color": color
     }
     new_cat = service.create_category(db, new_cat_data)
@@ -87,9 +113,6 @@ async def delete_category(
     db: Session=Depends(get_db),
     current_user: user_models.User = Depends(glob_dependencies.get_current_user)
 ):
-    '''
-    cat_str: ['HKU', 'COMP3230', 'Assignment']
-    '''
     category = category.dict()
     cats = category['cats']
     user_id = current_user.user_id
@@ -99,7 +122,7 @@ async def delete_category(
         
 @router.patch(
     "/name",
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_204_NO_CONTENT
 )
 async def rename_category(
     category: schemas.CategoryRenameIn,
@@ -130,7 +153,10 @@ async def move_category(
     current_user: user_models.User = Depends(glob_dependencies.get_current_user)
 ):
     """
-    HKU/COMP3230 -> /, /COMP3230 already exist
+    cats: ['HKU', 'COMP3230']
+    new_parent_cats: ['Dev', 'Git']
+    
+    Then, we want to move the entire HKU/COMP3230 category into under Dev/Git category.
     """
     category = category.dict()
     cats, new_parent_cats = category['cats'], category['new_parent_cats']
@@ -139,6 +165,7 @@ async def move_category(
         raise exceptions.CannotMoveRootDirectoryException()
     
     new_cat = new_parent_cats + [cats[-1]]
+    
     if service.check_exist_category(db, user_id, new_parent_cats + [cats[-1]]):
         raise exceptions.CategoryAlreadyExistsException('/'.join(new_parent_cats), cats[-1])
         
@@ -177,3 +204,16 @@ def get_category_color(
     user_id = current_user.user_id
     color = service.get_category_color_by_id(db, user_id, cat_id)
     return {"color": color}
+
+@router.get(
+    "/color",
+    status_code=status.HTTP_200_OK
+)
+def get_category_colors_dict(
+    db: Session=Depends(get_db),
+    current_user: user_models.User = Depends(glob_dependencies.get_current_user)
+):
+    user_id = current_user.user_id
+    colors = service.get_all_category_colors(db, user_id)
+    colors['No Category'] = "grey"
+    return colors
