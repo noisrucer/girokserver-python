@@ -164,6 +164,8 @@ Screen {
   /* color: rgb(168, 193, 209); */
   /* color: #d1cec0; */
   color: #b9b7ad;
+  /* width: 100%; */
+  height: 1;
 }
 
 #calendar-header-category {

@@ -15,7 +15,7 @@ def is_valid_month(month: int):
 
 
 def is_valid_day(year: int, month: int, day: int):
-    if day not in range(1, monthrange(year, month)[1]):
+    if day not in range(1, monthrange(year, month)[1] + 1):
         return False
     return True
 

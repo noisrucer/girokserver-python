@@ -57,13 +57,9 @@ def get_tasks(
 
 
 def remove_task(task_id: int):
-    query_str_obj = {
-        "task_id": task_id
-    }
     resp = requests.delete(
-        cfg.base_url + "/tasks",
+        cfg.base_url + f"/tasks/{task_id}",
         headers=auth_utils.build_jwt_header(cfg.config_path),
-        params=query_str_obj
     )
     return resp
     
@@ -106,6 +102,24 @@ def change_task_priority(task_id: int, new_priority: int):
     
     if resp.status_code == 204:
         display_utils.center_print(f"Successfully change [ID: {task_id}] priority to {new_priority}.", "black on green")
+    elif resp.status_code == 400:
+        err_msg = general_utils.bytes2dict(resp.content)['detail']
+        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+    else:
+        display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        
+
+def change_task_date(task_id: int, new_date: str):
+    resp = requests.patch(
+        cfg.base_url + f"/tasks/{task_id}/date",
+        headers=auth_utils.build_jwt_header(cfg.config_path),
+        json={
+            "new_date": new_date
+        }
+    )
+    
+    if resp.status_code == 204:
+        display_utils.center_print(f"Successfully change [ID: {task_id}] date to {new_date}.", "black on green")
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
         display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)

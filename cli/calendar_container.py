@@ -48,13 +48,13 @@ class CalendarHeader(Vertical):
                 yield Static(f"{self.tag}", id="calendar-header-tag")
         yield Horizontal()
         with WeekdayBarContainer(id="weekday-bar"):
-            yield Static(Text("Monday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR)), classes="calendar-weekday-name")
-            yield Static(Text("Tuesday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR)), classes="calendar-weekday-name")
-            yield Static(Text("Wednesday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR)), classes="calendar-weekday-name")
-            yield Static(Text("Thursday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR)), classes="calendar-weekday-name")
-            yield Static(Text("Friday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR)), classes="calendar-weekday-name")
-            yield Static(Text("Saturday", style=Style(color="#87C5FA")), classes="calendar-weekday-name")
-            yield Static(Text("Sunday", style=Style(color="#DB4455")), classes="calendar-weekday-name")
+            yield Static(Text("Monday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR, bold=True)), classes="calendar-weekday-name")
+            yield Static(Text("Tuesday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR, bold=True)), classes="calendar-weekday-name")
+            yield Static(Text("Wednesday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR, bold=True)), classes="calendar-weekday-name")
+            yield Static(Text("Thursday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR, bold=True)), classes="calendar-weekday-name")
+            yield Static(Text("Friday", style=Style(color=constants.CALENDAR_WEEKDAY_NAME_COLOR, bold=True)), classes="calendar-weekday-name")
+            yield Static(Text("Saturday", style=Style(color="#87C5FA", bold=True)), classes="calendar-weekday-name")
+            yield Static(Text("Sunday", style=Style(color="#DB4455", bold=True)), classes="calendar-weekday-name")
 
     def update_year_and_month(self, year, month):
         self.year, self.month = year, month
@@ -143,10 +143,8 @@ class Calendar(Container):
             prev_cell = self.query_one(f"#cell{prev_cell_num}")
             calendar_utils.remove_left_arrow(prev_cell)
 
-            # prev_cell.remove_class("focused-cell")
             cur_cell_num = calendar_utils.convert_coord_to_cell_num(nx, ny)
             next_cell = self.query_one(f"#cell{cur_cell_num}")
-            # next_cell.add_class("focused-cell")
             calendar_utils.add_left_arrow(next_cell)
 
             self.cur_focused_cell_cord = (nx, ny)
@@ -199,10 +197,10 @@ class Calendar(Container):
                 self.grid[x][y] = True
                 day = calendar_utils.convert_cell_num_to_day(self.year, self.month, i)
                 day_text = Text()
-                day_text.append(f"{day} ")
+                day_text.append(f"{day}")
                 if self.year == now.year and self.month == now.month and day == now.day:
-                    day_text.stylize(style=Style(bgcolor="#93F0FF", color="black"))
-                    # day_text.append("TODAY", style="#1560BD") # 00CED1
+                    day_text = Text(str(day_text), style=Style(bgcolor=constants.CALENDAR_TODAY_COLOR, color="black"))
+                    # day_text.stylize(style=Style(bgcolor=constants.CALENDAR_TODAY_COLOR, color="black"))
                 cell.mount(Label(day_text, id=f"cell-header-{i}"))
 
     def update_calendar(self, show_arrow=True):
@@ -251,8 +249,8 @@ class Calendar(Container):
                 cell = self.query_one(f"#cell{cell_num}")
                 color = task['color']
                 name = task['name']
-                if len(name) > 13:
-                    name = name[:13] + ".."
+                # if len(name) > 13:
+                #     name = name[:13] + ".."
                 task_item_name = Text()
                 task_item_name.append("●", style=constants.CIRCLE_COLOR[color])
                 task_item_name.append(" " + name)

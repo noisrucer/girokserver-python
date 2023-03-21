@@ -80,6 +80,7 @@ add_task_date_exclusivity_callback = AddTaskDateMutuallyExclusiveGroup()
 time_exclusivity_callback = TimeMutuallyExclusiveGroup()
 show_task_date_exclusivity_callback = ShowTaskDateMutuallyExclusiveGroup()
 task_view_exclusivity_callback = TaskViewMutuallyExclusiveGroup()
+
 ###################################################################################
 
 
@@ -209,7 +210,7 @@ def add_task(
     priority: int = typer.Option(None, "-p", "--priority", help="priority", callback=priority_callback),
     color: str = typer.Option(None, "--color", help="Color"),
     deadline: str = typer.Option(None, "-d", "--deadline", help="Deadline", callback=full_date_callback),
-    everyday: bool = typer.Option(False, "-e", "--everyday", help="Set task due everyday"),
+    # everyday: bool = typer.Option(False, "-e", "--everyday", help="Set task due everyday"),
     today: bool = typer.Option(None, "--tdy", help="Set deadline to today", callback=add_task_date_exclusivity_callback),
     tomorrow: bool = typer.Option(None, "--tmr", "--tomorrow", help="Set deadline to tomorrow", callback=add_task_date_exclusivity_callback),
     this_mon: bool = typer.Option(None, "-t1", "--thismon", help="Set deadline to this Monday", callback=add_task_date_exclusivity_callback),
@@ -228,7 +229,7 @@ def add_task(
     next_sun: bool = typer.Option(None, "-n7", "--nextsun", help="Set deadline to next Sunday", callback=add_task_date_exclusivity_callback),
     after: int = typer.Option(None, "-a", "--after", help="Set deadline to after x days", callback=after_callback),
     time: str = typer.Option(None, "-t", "--time", help="Deadline time, xx:yy", callback=time_callback),
-    all_day: bool = typer.Option(None, "--allday", help="Set deadline time to all day", callback=all_day_callback),
+    # all_day: bool = typer.Option(None, "--allday", help="Set deadline time to all day", callback=all_day_callback),
     tag: str = typer.Option(None, "--tag", help="Tag"),
 ):
     # Category
@@ -241,11 +242,11 @@ def add_task(
     this_week_group = [this_mon, this_tue, this_wed, this_thu, this_fri, this_sat, this_sun]
     next_week_group = [next_mon, next_tue, next_wed, next_thu, next_fri, next_sat, next_sun]
 
-    if not any(this_week_group + next_week_group + [deadline, today, tomorrow, after, everyday]):
+    if not any(this_week_group + next_week_group + [deadline, today, tomorrow, after]):
         raise typer.BadParameter("At least one of deadline options is required.")
 
-    if everyday and any(this_week_group + next_week_group + [deadline, today, tomorrow, after]):
-        raise typer.BadParameter("'--everyday' option cannot be used with other deadline options.")
+    # if everyday and any(this_week_group + next_week_group + [deadline, today, tomorrow, after]):
+    #     raise typer.BadParameter("'--everyday' option cannot be used with other deadline options.")
 
     year, month, day = None, None, None
     if deadline:
@@ -279,8 +280,8 @@ def add_task(
             weekday_num=this_week_day_num
         )
 
-    if everyday:
-        year, month, day = "2000", "01", "01" # meaningless date in case of everyday
+    # if everyday:
+    #     year, month, day = "2000", "01", "01" # meaningless date in case of everyday
 
     full_deadline = f"{year}-{month}-{day} {time if time else '12:00:00'}"
 
@@ -300,24 +301,32 @@ def add_task(
         "deadline": full_deadline,
         "priority": priority,
         "color": color,
-        "everyday": everyday,
+        # "everyday": everyday,
         "tag": tag,
-        "all_day": all_day,
+        # "all_day": all_day,
         "is_time": time is not None
     }
     task_id = task_api.create_task(task_data)
     display_utils.center_print("Task added successfully!", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)
     current_date = task_utils.build_date_info(datetime.now())
     display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
-    tasks_resp = task_api.get_tasks(view="list")
+    
+    tasks_resp = task_api.get_tasks(view="category")
     tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
-    display_utils.display_tasks_by_list(tasks, marked_task_id=task_id, color=constants.TABLE_TASK_HIGHLIGHT_COLOR)
+    color_dict = category_api.get_color_dict()
+    task_tree = display_utils.display_tasks_by_category(
+        tasks,
+        color_dict=color_dict,
+        marked_task_id=task_id,
+        marked_color=constants.TABLE_TASK_HIGHLIGHT_COLOR
+    )
+    print(task_tree)
 
 
 @app.command("showtask")
 def show_task(
     cat: str = typer.Option(None, "-c", "--category", help="Category path - xx/yy/zz..", callback=category_callback),
-    exact_day: str = typer.Option(None, "-e", "--exact", help="Deadline", callback=full_date_callback),
+    exact_day: str = typer.Option(None, "-e", "--exact", help="Exact Deadline", callback=full_date_callback),
     within_days: int = typer.Option(None, "-d", "--day", help="Show tasks due within the specified days", callback=offset_callback),
     within_weeks: int = typer.Option(None, "-w", "--week", help="Show tasks due within the specified weeks", callback=offset_callback),
     within_months: int = typer.Option(None, "-m", "--month", help="Show tasks due within the specified months", callback=offset_callback),
@@ -418,6 +427,10 @@ def show_task(
             weekday_num=this_week_day_num
         )
         start_date, end_date = f"{year}-{month}-{day} 00:00:00", f"{year}-{month}-{day} 11:59:59"
+        
+    if exact_day:
+        year, month, day = exact_day
+        start_date, end_date = f"{year}-{month}-{day} 00:00:00", f"{year}-{month}-{day} 11:59:59"
 
     no_priority = False
     if priority == "none":
@@ -464,14 +477,17 @@ def show_task(
         display_utils.center_print("Error occurred.", constants.DISPLAY_TERMINAL_COLOR_ERROR)
 
 
-@app.command("rmtask")
+@app.command("done")
 def remove_task(task_id: int = typer.Argument(..., help="Task ID to be deleted")):
-    tasks_resp = task_api.get_tasks(view="list")
+    tasks_resp = task_api.get_tasks()
     tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
     resp = task_api.remove_task(task_id)
     if resp.status_code == 204:
-        display_utils.center_print("Task deleted successfully!", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)
-        display_utils.display_tasks_by_list(tasks, marked_task_id=task_id, color=constants.TABLE_TASK_DELETED_COLOR)
+        color_dict = category_api.get_color_dict()
+        task_tree = display_utils.display_tasks_by_category(tasks, color_dict=color_dict, marked_task_id=task_id)
+        current_date = task_utils.build_date_info(datetime.now())
+        display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
+        print(task_tree)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
         display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
@@ -502,6 +518,25 @@ def change_tag(
     tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
     display_utils.display_tasks_by_list(tasks, marked_task_id=task_id, color=constants.TABLE_TASK_HIGHLIGHT_COLOR)
 
+    
+@app.command("chdate")
+def change_date(
+    task_id: int = typer.Argument(..., help="Task ID"),
+    deadline: str = typer.Option(None, "-d", "--deadline", help="Deadline", callback=full_date_callback),
+    time: str = typer.Option(None, "-t", "--time", help="Deadline time, xx:yy", callback=time_callback)
+):
+    year, month, day = None, None, None
+    if deadline:
+        year, month, day = deadline
+    full_deadline = f"{year}-{month}-{day} {time if time else '12:00:00'}"
+    print(full_deadline)
+    
+    task_api.change_task_date(task_id, full_deadline)
+
+    tasks_resp = task_api.get_tasks(view="list")
+    tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
+    display_utils.display_tasks_by_list(tasks, marked_task_id=task_id, color=constants.TABLE_TASK_HIGHLIGHT_COLOR)
+    
 
 @app.command("showtag")
 def show_tag():

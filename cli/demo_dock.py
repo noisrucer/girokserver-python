@@ -37,10 +37,10 @@ class Entry(App):
         ("ctrl+g", "focus_on_sidebar", "Move to sidebar"),
         ("ctrl+j", "move_down_to_tag_tree", "Move down to tag tree"),
         ("ctrl+k", "move_up_to_category_tree", "Move up to category tree"),
-        ("o", 'close_pop_up', "Close pop up box")
-        # ("f", "toggle_files", "Toggle Files")
+        ("o", 'close_pop_up', "Close pop up box"),
+        ("f", "toggle_files", "Toggle Files")
     ]
-    # show_sidebar = reactive(True)
+    show_sidebar = reactive(True)
     
     def on_mount(self):
         self.set_focus(self.query_one(CategoryTree))
@@ -101,9 +101,11 @@ class Entry(App):
         self.current_focused = "CategoryTree"
         
         cal = self.query_one(Calendar)
+        
+        cell3 = self.query_one("#cell3")
         if self.is_pop_up:
             return
-        calendar_utils.remove_left_arrow(cal.cur_focused_cell)
+        calendar_utils.remove_left_arrow(cal.cur_focused_cell, cell3)
         
     def action_move_down_to_tag_tree(self):
         if self.is_pop_up:
@@ -140,89 +142,13 @@ class Entry(App):
         self.query_one(Calendar).is_pop_up = False
         self.is_pop_up = False
         
-        
-    
-    # def watch_show_sidebar(self, show_sidebar: bool):
-    #     sidebar_container = self.query_one(SidebarContainer)
-    #     if show_sidebar:
-    #         sidebar_container.styles.display = "block"
-    #     else:
-    #         sidebar_container.styles.display = "none"
-        
-    # def action_toggle_files(self):
-    #     self.show_sidebar = not self.show_sidebar
-    #     sidebar_container = self.query_one(SidebarContainer)
-    #     if self.show_sidebar:
-    #         sidebar_container.styles.display = "block"
-    #     else:
-    #         sidebar_container.styles.display = "none"
-        
-    # self.set_class(show_sidebar, "show-sidebar")
-        
-                
-    # def on_category_tree_category_changed(self, event):
-    #     log("AAAA")
-    #     wow = self.query_one(SimpleText)
-    #     wow.show()
-                # yield FizzBuzz()
-                # with Horizontal(id="calendar-main-container"):
-                #         with Vertical(classes="vertical"):
-                #             yield Static("Monday", classes="weekday-name")
-                #             yield Static(f"1", classes="calendar-cell")
-                #             yield Static(f"8", classes="calendar-cell")
-                #             yield Static(f"15", classes="calendar-cell")
-                #             yield Static(f"22", classes="calendar-cell")
-                #             yield Static(f"29", classes="calendar-cell")
-                #         with Vertical(classes="vertical"):
-                #             yield Static("Tuesday", classes="weekday-name")
-                #             yield Static(f"2", classes="calendar-cell")
-                #             yield Static(f"9", classes="calendar-cell")
-                #             yield Static(f"16", classes="calendar-cell")
-                #             yield Static(f"23", classes="calendar-cell")
-                #             yield Static(f"30", classes="calendar-cell")
-                #         with Vertical(classes="vertical"):
-                #             yield Static("Wednesday", classes="weekday-name")
-                #             yield Static(f"3", classes="calendar-cell")
-                #             yield Static(f"10", classes="calendar-cell")
-                #             yield Static(f"17", classes="calendar-cell")
-                #             yield Static(f"24", classes="calendar-cell")
-                #             yield Static(f"31", classes="calendar-cell")
-                #         with Vertical(classes="vertical"):
-                #             yield Static("Thursday", classes="weekday-name")
-                #             yield Static(f"4", classes="calendar-cell")
-                #             yield Static(f"11", classes="calendar-cell")
-                #             yield Static(f"18", classes="calendar-cell")
-                #             yield Static(f"25", classes="calendar-cell")
-                #             yield Static(f"1", classes="calendar-cell")
-                #         with Vertical(classes="vertical"):
-                #             yield Static("Friday", classes="weekday-name")
-                #             yield Static(f"5", classes="calendar-cell")
-                #             yield Static(f"12", classes="calendar-cell")
-                #             yield Static(f"19", classes="calendar-cell")
-                #             yield Static(f"26", classes="calendar-cell")
-                #             yield Static(f"2", classes="calendar-cell")
-                #         with Vertical(classes="vertical"):
-                #             yield Static("Saturday", classes="weekday-name")
-                #             yield Static(f"6", classes="calendar-cell")
-                #             yield Static(f"13", classes="calendar-cell")
-                #             yield Static(f"20", classes="calendar-cell")
-                #             yield Static(f"27", classes="calendar-cell")
-                #             yield Static(f"3", classes="calendar-cell")
-                #         with Vertical(classes="vertical"):
-                #             yield Static("Sunday", classes="weekday-name")
-                #             with Static(classes="calendar-cell"):
-                #                 yield Static(f"7", classes="test")
-                #             with Static(classes="calendar-cell"):
-                #                 yield Static(f"14")
-                #             with Static(classes="calendar-cell"):
-                #                 yield Static(f"21")
-                #             with Static(classes="calendar-cell"):
-                #                 yield Static(f"28")
-                #             with Static(classes="calendar-cell"):
-                #                 yield Static(f"4")
-                #         # with Container(id=f"calendar-cell-{i}", classes="calendar-cell"):
-                        #     yield Static(f"cell {i}")
-        # yield Footer()
+    def action_toggle_files(self):
+        self.show_sidebar = not self.show_sidebar
+        sidebar_container = self.query_one(SidebarContainer)
+        if self.show_sidebar:
+            sidebar_container.styles.display = "block"
+        else:
+            sidebar_container.styles.display = "none"
             
 if __name__ == '__main__':
     Entry().run()

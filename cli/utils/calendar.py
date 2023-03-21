@@ -62,27 +62,45 @@ def get_date_obj_from_str_separated_by_T(s: str):
     return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
 
 
-def remove_left_arrow(cell):
+def remove_left_arrow(cell, cell3=None):
+    log("REMOVE CELL", cell)
     if not cell.children:
         return
     cell_label = cell.children[0]
-    cell_label_text = str(cell_label.render())
-    if cell_label_text.endswith(" " + constants.LEFT_ARROW_EMOJI):
-        new_label_text = Text(cell_label_text[:2])
+    cell_label_text = cell_label.render()
+    style = cell_label_text.style
+    log("REMOVE CELL LABEL TEXT", cell_label_text)
+    if str(cell_label_text).endswith(" " + constants.LEFT_ARROW_EMOJI):
+        style = cell_label_text.spans[0].style        
+        
+    if str(cell_label_text).endswith(" " + constants.LEFT_ARROW_EMOJI):
+        new_label_text = Text(str(cell_label_text)[:2], style=style)
     else:
-        new_label_text = Text(cell_label_text)
+        new_label_text = Text(str(cell_label_text), style=style)
+    log("NEW_LABEL_TEXT", new_label_text)
+    if cell3:
+        log("CELL3", cell3.children[0].render())
     cell_label.update(new_label_text)
+    if cell3:
+        log("CELL3", cell3.children[0].render())
     
     
 def add_left_arrow(cell):
+    log("ADD")
     if not cell.children:
         return
+    
     cell_label = cell.children[0]
-    cell_label_text = str(cell_label.render())
-    if cell_label_text.endswith(" " + constants.LEFT_ARROW_EMOJI):
-        new_label_text = cell_label_text
+    cell_label_text = cell_label.render()
+    # style_str = str(cell_label_text.style)
+    style = cell_label_text.style
+    log("STYLE", style)
+    
+    if str(cell_label_text).endswith(" " + constants.LEFT_ARROW_EMOJI):
+        new_label_text = Text(str(cell_label_text), style=style)
     else:
-        new_label_text = Text.assemble(cell_label_text, " ", Text(constants.LEFT_ARROW_EMOJI, style=Style(color="red")))
+        new_label_text = Text.assemble(Text(str(cell_label_text), style=style), " ", Text(constants.LEFT_ARROW_EMOJI, style=Style(color="red")))
+    print("TO BE UPDATED", new_label_text.style)
     cell_label.update(new_label_text)
     
 
