@@ -48,32 +48,6 @@ async def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-# @router.post('/register/verification', status_code=status.HTTP_200_OK)
-# async def verify_email(verification_info: schemas.VerifyEmail, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-#     verification_info = verification_info.dict()
-#     email = verification_info['email']
-
-#     # Check if email is HKU email (xxx@connect.hku.hk)
-#     if not service.verify_valid_hku_email(email):
-#         raise exceptions.EmailNotValidHKUEmailException()
-        
-#     # Check if the email has been already registered
-#     if service.get_user_by_email(db, email=email):
-#         raise exceptions.EmailAlreadyExistsException(email=verification_info['email'])
-    
-#     # Send verification code
-#     verification_code = utils.generate_verification_code(len=6)
-#     recipient = email
-#     subject="[Vizta] Please verify your email address"
-#     content = utils.read_html_content_and_replace(
-#         replacements={"__VERIFICATION_CODE__": verification_code},
-#         html_path="backend/src/email/verification.html"
-#     )
-#     background_tasks.add_task(glob_utils.send_email, recipient, content, subject)
-    
-#     return {"status": "successful", "verification_token": verification_code}
-
-
 @router.post('/login', response_model=schemas.Token)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),

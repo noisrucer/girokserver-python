@@ -16,3 +16,10 @@ class InvalidPriorityPairException(HTTPException):
     def __init__(self):
         self.status_code = status.HTTP_400_BAD_REQUEST
         self.detail = f"Min and max priority must be both present or all None."
+        
+class TaskNotFoundException(HTTPException):
+    def __init__(self, task_id):
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = f"Task id {task_id} is not found."
+
+    

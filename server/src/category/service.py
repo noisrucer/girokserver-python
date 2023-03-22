@@ -1,3 +1,4 @@
+from collections import defaultdict
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
@@ -92,9 +93,10 @@ def build_category_tree(db: Session, user_id, cat_id):
     subs = get_subcategories_by_parent_id(db, user_id, cat_id)
     if subs is None: # Base case
         return {}
-    res = dict()
+    res = defaultdict(dict)
     for sub in subs:
-        res[sub.name] = build_category_tree(db, user_id, sub.task_category_id)
+        res[sub.name]['subcategories'] = build_category_tree(db, user_id, sub.task_category_id)
+        res[sub.name]['color'] = sub.color
     return res
 
 
@@ -111,7 +113,7 @@ def is_super_category(db: Session, super: str, sub: str):
 
 def get_last_cat_id(db: Session, user_id: int, cats: list):
     '''
-    ex) ['HKU', 'COMP3230', 'Assignment'] -> return id of COMP3230
+    ex) ['HKU', 'COMP3230', 'Assignment'] -> return id of Assignment
     cats: list[str]
     Return
         parent_id (int): closest parent id
@@ -174,6 +176,29 @@ def get_category_full_path_by_id(db: Session, user_id: int, category_id: int):
     return cat_path
 
 
-# def get_all_recursive_cat_ids_by_id(db: Session, user_id: int, )
+def get_all_category_colors(db: Session, user_id: int):
+    colors = db.query(models.TaskCategory.name, models.TaskCategory.color).\
+        filter(models.TaskCategory.user_id == user_id).all()
+    colors = {c[0]: c[1] for c in colors}
+    return colors
+
+    
+def get_root_category_id(db: Session, user_id: int, cat_id: int):
+    cat = db.query(models.TaskCategory).\
+        filter(
+                and_(
+                    models.TaskCategory.user_id == user_id,
+                    models.TaskCategory.task_category_id == cat_id   
+                )
+            ).first()
+        
+    if not cat:
+        raise exceptions.CategoryNotExistException(str(cat_id))
+    
+    pid = cat.super_task_category_id
+    if pid is None:
+        return cat_id
+    
+    return get_root_category_id(db, user_id, pid)
 
 
