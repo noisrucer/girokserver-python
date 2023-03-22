@@ -15,7 +15,7 @@ def is_valid_month(month: int):
 
 
 def is_valid_day(year: int, month: int, day: int):
-    if day not in range(1, monthrange(year, month)[1]):
+    if day not in range(1, monthrange(year, month)[1] + 1):
         return False
     return True
 
@@ -156,6 +156,6 @@ def get_month_name_by_number(month_num: int, abbr=False):
     month_num: 0 ~ 11
     """
     if abbr:
-        return calendar.month_name[month_num]
-    else:
         return calendar.month_abbr[month_num]
+    else:
+        return calendar.month_name[month_num]
