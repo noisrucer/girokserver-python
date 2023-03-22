@@ -10,12 +10,12 @@ class TaskCreateIn(BaseModel):
     task_category_id: Union[int, None] = None
     name: str
     deadline: str
-    priority: int = Field(default=None, gt=1, le=5)
+    priority: int = Field(default=None, ge=1, le=5)
     color: Union[str, None] = None
-    everyday: bool = False
+    everyday: Union[bool, None] = False
     tag: Union[str, None] = None
     is_time: bool = False
-    all_day: bool = False
+    all_day: Union[bool, None] = False
     weekly_repeat: int = Field(default=None, gt=0, le=6)
 
 
@@ -34,14 +34,18 @@ class Task(BaseModel):
     name: str
     color: str
     deadline: str
-    all_day: bool
+    all_day: Union[bool, None]
     is_time: bool
     priority: Union[int, None]
-    everyday: bool
+    everyday: Union[bool, None]
     created_at: datetime
     
     class Config:
         orm_mode = True
+        
+
+class GetSingleTaskOut(BaseModel):
+    name: str
     
         
 class TaskOut(BaseModel):
@@ -61,4 +65,8 @@ class ChangeTaskTagIn(BaseModel):
     new_tag_name: str
 
 class ChangeTaskPriorityIn(BaseModel):
-    new_priority: int = Field(gt=1, le=5)
+    new_priority: int = Field(ge=1, le=5)
+
+
+class ChangeTaskDateIn(BaseModel):
+    new_date: str = Field(default=..., regex="^([0-9]){4}-([0-9]){1,2}-([0-9]){1,2} [0-9]{2}:[0-9]{2}:[0-9]{2}$")

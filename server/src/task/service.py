@@ -17,6 +17,23 @@ def create_task(db: Session, task_data):
     db.refresh(new_task)
     return new_task
 
+
+def get_single_task(db: Session, user_id: int, task_id: int):
+    task = db.query(models.Task).\
+        filter(
+            and_(
+                models.Task.user_id == user_id,
+                models.Task.task_id == task_id
+            )
+        ).first()
+    
+    if not task:
+        raise exceptions.TaskNotFoundException(task_id=task_id)
+    
+    task = general_utils.sql_obj_to_dict(task)
+    return task
+
+
 def get_tasks_by_category(
     db: Session,
     user_id: int,
@@ -124,6 +141,11 @@ def get_direct_tasks_of_category(
     priority: Union[int, None] = None,
     no_priority: bool = False
     ):
+    cat_color = None
+    if cat_id:
+        root_id = category_service.get_root_category_id(db, user_id, cat_id)
+        cat_color = category_service.get_category_color_by_id(db, user_id, root_id)
+        
     tasks_query = db.query(models.Task).\
         filter(
             and_(
@@ -139,18 +161,20 @@ def get_direct_tasks_of_category(
     else:
         if priority:
             tasks_query = tasks_query.filter(models.Task.priority == priority)
-            
-            
     
     if tag:
         tasks_query = tasks_query.filter(models.Task.tag == tag)
     
-    tasks = tasks_query.order_by(models.Task.deadline.asc()).all()
+    tasks = tasks_query.order_by(models.Task.deadline.asc()).order_by(models.Task.priority.desc()).all()
     tasks_obj_list = general_utils.sql_obj_list_to_dict_list(tasks)
     for task_obj in tasks_obj_list:
         task_obj.update({
-            "task_category_full_path": category_service.get_category_full_path_by_id(db, user_id, task_obj['task_category_id'])
+            "task_category_full_path": category_service.get_category_full_path_by_id(db, user_id, task_obj['task_category_id']),
         })
+        
+        if cat_color:
+            task_obj.update({"color": cat_color})
+
     return tasks_obj_list
     
     
@@ -200,4 +224,20 @@ def change_task_priority(db: Session, user_id: int, task_id: int, new_priority: 
         raise exceptions.TaskNotFoundException(task_id=task_id)
 
     setattr(task, "priority", new_priority)
+    db.commit()
+
+    
+def change_task_date(db: Session, user_id: int, task_id: int, new_date: str):
+    task = db.query(models.Task).\
+        filter(
+            and_(
+                models.Task.user_id == user_id,
+                models.Task.task_id == task_id
+            )
+        ).first()
+        
+    if not task:
+        raise exceptions.TaskNotFoundException(task_id=task_id)
+
+    setattr(task, "deadline", new_date)
     db.commit()

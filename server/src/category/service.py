@@ -176,10 +176,29 @@ def get_category_full_path_by_id(db: Session, user_id: int, category_id: int):
     return cat_path
 
 
-def get_all_category_colors(db: Session, user_id: int) -> dict:
+def get_all_category_colors(db: Session, user_id: int):
     colors = db.query(models.TaskCategory.name, models.TaskCategory.color).\
         filter(models.TaskCategory.user_id == user_id).all()
     colors = {c[0]: c[1] for c in colors}
     return colors
+
+    
+def get_root_category_id(db: Session, user_id: int, cat_id: int):
+    cat = db.query(models.TaskCategory).\
+        filter(
+                and_(
+                    models.TaskCategory.user_id == user_id,
+                    models.TaskCategory.task_category_id == cat_id   
+                )
+            ).first()
+        
+    if not cat:
+        raise exceptions.CategoryNotExistException(str(cat_id))
+    
+    pid = cat.super_task_category_id
+    if pid is None:
+        return cat_id
+    
+    return get_root_category_id(db, user_id, pid)
 
 

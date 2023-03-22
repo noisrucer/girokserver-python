@@ -3,7 +3,7 @@ import pprint
 
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, status, Depends, Query
+from fastapi import APIRouter, status, Depends, Query, Path
 from sqlalchemy.orm import Session
 
 from server.src.database import get_db
@@ -38,7 +38,7 @@ async def create_task(
     task.update({'user_id': user_id})
     new_task = service.create_task(db, task)
     return new_task
-
+    
 
 @router.get(
     "/",
@@ -127,20 +127,17 @@ async def get_tasks(
     
     
 @router.delete(
-    "/",
+    "/{task_id}",
     status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_task(
-    task_id: int = Query(
-        default=...,
-        title="Task ID to be deleted",
-        ge=1
-    ),
+    task_id: int,
     db: Session = Depends(get_db),
     current_user: user_models.User = Depends(glob_dependencies.get_current_user)
 ):
     user_id = current_user.user_id
     service.delete_task(db, user_id, task_id)
+    
     
 @router.patch(
     '/{task_id}/tag',
@@ -156,6 +153,7 @@ async def change_task_tag(
     tag = tag.dict()
     new_tag_name = tag['new_tag_name']
     service.change_task_tag(db, user_id, task_id, new_tag_name)
+
 
 @router.patch(
     '/{task_id}/priority',
@@ -173,6 +171,22 @@ async def change_task_priority(
     service.change_task_priority(db, user_id, task_id, new_priority)
 
 
+@router.patch(
+    '/{task_id}/date',
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def change_task_date(
+    task_id: int,
+    data: schemas.ChangeTaskDateIn,
+    db: Session=Depends(get_db),
+    current_user: user_models.User = Depends(glob_dependencies.get_current_user) 
+):
+    user_id = current_user.user_id
+    data = data.dict()
+    new_date = data['new_date']
+    service.change_task_date(db, user_id, task_id, new_date)
+
+
 @router.get(
     '/tags',
     status_code=status.HTTP_200_OK,
@@ -185,9 +199,18 @@ async def get_tags(
     user_id = current_user.user_id
     tags = service.get_tags(db, user_id)
     return {"tags": tags}
-    
-    
-    
 
-    
-    
+
+@router.get(
+    "/{task_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=schemas.GetSingleTaskOut
+)
+async def get_single_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: user_models.User = Depends(glob_dependencies.get_current_user)
+):
+    user_id = current_user.user_id
+    task = service.get_single_task(db, user_id, task_id)
+    return task
