@@ -4,6 +4,7 @@ from textual.widgets import Button, Footer, Header, Static, Label, Placeholder, 
 from textual.messages import Message
 from textual.widget import Widget
 from textual.reactive import var, reactive
+from textual import events
 
 import api.category as category_api
 import api.task as task_api
@@ -29,16 +30,21 @@ class CategoryTree(Tree):
         def __init__(self, cat_path: str):
             super().__init__()
             self.cat_path = cat_path
+
+    class CustomTestMessage(Message):
+        def __init__(self):
+            super().__init__()
     
     def on_mount(self):
         # Select the topmost node
         # self.select_node(self.root)
         self.highlighted_node = self.root
         self.selected_node = self.root
-        calendar_utils.add_highlight(self.selected_node)
+        # calendar_utils.add_highlight(self.selected_node)
         calendar_utils.add_left_arrow_tree(self.highlighted_node)
-        self.select_node(self.selected_node)
-        self.action_select_cursor()
+        # self.temp_node_selected()
+        # self.select_node(self.selected_node)
+        # self.action_select_cursor()
 
         self.line = 0
         self.cats = category_api.get_categories()
@@ -56,7 +62,7 @@ class CategoryTree(Tree):
             self.action_cursor_up()
         elif evt.key == "o":
             self.action_select_cursor()
-            
+
     def render_label(self, node, base_style: Style, style: Style):
         node_label = node._label.copy()
         icon = ""
@@ -71,6 +77,8 @@ class CategoryTree(Tree):
         
     def on_tree_node_selected(self, event: Tree.NodeSelected):
         event.stop()
+        # calendar_utils.remove_highlight(self.selected_node)
+        # calendar_utils.add_highlight(event.node)
         full_cat_path = calendar_utils.get_full_path_from_node(event.node)
         self.selected_node = event.node
         self.post_message(self.CategoryChanged(full_cat_path))
@@ -86,8 +94,7 @@ class CategoryTree(Tree):
         self.highlighted_node = event.node
         
     def on_focus(self, evt):
-        pass
-        # calendar_utils.add_left_arrow_tree(self.highlighted_node)
+        calendar_utils.add_left_arrow_tree(self.highlighted_node)
         
         
 class TagTree(Tree):
@@ -103,6 +110,10 @@ class TagTree(Tree):
         def __init__(self, tag: str):
             super().__init__()
             self.tag = tag
+            
+    class CustomTestMessage(Message):
+        def __init__(self):
+            super().__init__()
             
     def on_mount(self):
         self.select_node(self.root)
@@ -133,8 +144,7 @@ class TagTree(Tree):
             self.action_select_cursor()
             
     def on_focus(self, evt):
-        # calendar_utils.add_left_arrow_tree(self.highlighted_node)
-        pass
+        calendar_utils.add_left_arrow_tree(self.highlighted_node)
             
     def render_label(self, node, base_style: Style, style: Style):
         node_label = node._label.copy()
@@ -154,11 +164,14 @@ class TagTree(Tree):
         event.stop()
         # calendar_utils.remove_highlight(self.selected_node)
         tag = str(event.node._label)
-        if tag == "All Tags" or tag == "All Tags " + constants.LEFT_ARROW_EMOJI:
-            tag = ""
+        if tag.endswith(" " + constants.LEFT_ARROW_EMOJI):
+            tag = tag[:-2]
+
         self.post_message(self.TagChanged(tag))
+        event.node.set_label(tag)
         # calendar_utils.add_highlight(event.node)
         self.selected_node = event.node
+        # self.post_message(self.CustomTestMessage())
         
     def on_tree_node_highlighted(self, event: Tree.NodeHighlighted):
         event.stop()
@@ -168,9 +181,6 @@ class TagTree(Tree):
         calendar_utils.add_left_arrow_tree(event.node)
         calendar_utils.add_highlight(event.node)
         self.highlighted_node = event.node
-        
-    def on_focus(self, evt):
-        pass
         
         
 class SidebarMainContainer(Vertical):

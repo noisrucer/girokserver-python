@@ -181,7 +181,7 @@ class Calendar(Container):
 
     def update_tag(self, new_tag: str):
         self.tag = new_tag
-        self.update_calendar()
+        self.update_calendar(show_arrow=False)
 
     def refresh_cell_days(self):
         self.grid = [[False for _ in range(7)] for _ in range(5)]
@@ -218,6 +218,9 @@ class Calendar(Container):
             tag = None
         else:
             tag = self.tag
+            
+        log("CATS", cat_list),
+        log("tag", tag)
 
         start_date, end_date = task_utils.build_time_window_by_year_and_month(self.year, self.month)
         resp = task_api.get_tasks(

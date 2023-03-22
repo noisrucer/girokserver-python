@@ -9,6 +9,7 @@ from rich.align import Align
 from rich.padding import Padding
 from rich.panel import Panel
 from rich.layout import Layout
+from rich.style import Style
 
 import constants as constants
 from config import get_config
@@ -307,9 +308,9 @@ def add_task(
         "is_time": time is not None
     }
     task_id = task_api.create_task(task_data)
-    display_utils.center_print("Task added successfully!", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)
+    display_utils.center_print("Task added successfully!", type="success")
     current_date = task_utils.build_date_info(datetime.now())
-    display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
+    display_utils.center_print(current_date, type="title")
     
     tasks_resp = task_api.get_tasks(view="category")
     tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
@@ -373,9 +374,6 @@ def show_task(
 
     this_week_group = [this_mon, this_tue, this_wed, this_thu, this_fri, this_sat, this_sun]
     next_week_group = [next_mon, next_tue, next_wed, next_thu, next_fri, next_sat, next_sun]
-
-    if exact_day:
-        print(exact_day)
 
     if today is not None:
         start_date, end_date = task_utils.build_time_window_by_day_offsets(0, 0)
@@ -464,35 +462,48 @@ def show_task(
             color_dict = category_api.get_color_dict()
             task_tree = display_utils.display_tasks_by_category(tasks, color_dict=color_dict)
             current_date = task_utils.build_date_info(datetime.now())
-            display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
+            display_utils.center_print(current_date, type='title')
             print(task_tree)
         elif list_view:
             current_date = task_utils.build_date_info(datetime.now())
-            display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
+            display_utils.center_print(current_date, type='title')
             display_utils.display_tasks_by_list(tasks)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(err_msg, type="error")
     else:
-        display_utils.center_print("Error occurred.", constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print("Error occurred.", type="title")
 
 
 @app.command("done")
 def remove_task(task_id: int = typer.Argument(..., help="Task ID to be deleted")):
+    task_ids_cache = general_utils.read_task_ids_cache(cfg=cfg)
+    if str(task_id) not in task_ids_cache:
+        display_utils.center_print("Task ID not found.", type="error")
+        exit(0)
+        
+    target_task_id = task_ids_cache[str(task_id)]
+    target_task = task_api.get_single_task(target_task_id)
+    target_task_name = target_task['name']
+    
     tasks_resp = task_api.get_tasks()
     tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
-    resp = task_api.remove_task(task_id)
+    done_confirm = typer.confirm(f"Are you sure to delete task [{target_task_name}]?")
+    if not done_confirm:
+        exit(0)
+    resp = task_api.remove_task(target_task_id)
+    
     if resp.status_code == 204:
         color_dict = category_api.get_color_dict()
-        task_tree = display_utils.display_tasks_by_category(tasks, color_dict=color_dict, marked_task_id=task_id)
+        task_tree = display_utils.display_tasks_by_category(tasks, color_dict=color_dict, marked_task_id=target_task_id)
         current_date = task_utils.build_date_info(datetime.now())
-        display_utils.center_print(current_date, constants.DISPLAY_TERMINAL_COLOR_TITLE)
+        display_utils.center_print(current_date, type="title")
         print(task_tree)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(err_msg, type="error")
     else:
-        display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(resp.content, type="error")
         
 
 @app.command("chtag")
@@ -500,11 +511,13 @@ def change_tag(
     task_id: int = typer.Argument(..., help="Task ID"),
     tag_name: str = typer.Argument(..., help="New tag name")
 ):
-    task_api.change_task_tag(task_id, tag_name)
+    task_ids_cache = general_utils.read_task_ids_cache(cfg=cfg)
+    target_task_id = task_ids_cache[str(task_id)]
+    task_api.change_task_tag(target_task_id, tag_name)
 
     tasks_resp = task_api.get_tasks(view="list")
     tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
-    display_utils.display_tasks_by_list(tasks, marked_task_id=task_id, color=constants.TABLE_TASK_HIGHLIGHT_COLOR)
+    display_utils.display_tasks_by_list(tasks, marked_task_id=target_task_id, color=constants.TABLE_TASK_HIGHLIGHT_COLOR)
 
     
 @app.command("chpri")
@@ -512,11 +525,13 @@ def change_tag(
     task_id: int = typer.Argument(..., help="Task ID"),
     priority: int = typer.Argument(..., help="New Priority")
 ):
-    task_api.change_task_priority(task_id, priority)
+    task_ids_cache = general_utils.read_task_ids_cache(cfg=cfg)
+    target_task_id = task_ids_cache[str(task_id)]
+    task_api.change_task_priority(target_task_id, priority)
 
     tasks_resp = task_api.get_tasks(view="list")
     tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
-    display_utils.display_tasks_by_list(tasks, marked_task_id=task_id, color=constants.TABLE_TASK_HIGHLIGHT_COLOR)
+    display_utils.display_tasks_by_list(tasks, marked_task_id=target_task_id, color=constants.TABLE_TASK_HIGHLIGHT_COLOR)
 
     
 @app.command("chdate")
@@ -531,11 +546,13 @@ def change_date(
     full_deadline = f"{year}-{month}-{day} {time if time else '12:00:00'}"
     print(full_deadline)
     
-    task_api.change_task_date(task_id, full_deadline)
+    task_ids_cache = general_utils.read_task_ids_cache(cfg=cfg)
+    target_task_id = task_ids_cache[str(task_id)]
+    task_api.change_task_date(target_task_id, full_deadline)
 
     tasks_resp = task_api.get_tasks(view="list")
     tasks = general_utils.bytes2dict(tasks_resp.content)['tasks']
-    display_utils.display_tasks_by_list(tasks, marked_task_id=task_id, color=constants.TABLE_TASK_HIGHLIGHT_COLOR)
+    display_utils.display_tasks_by_list(tasks, marked_task_id=target_task_id, color=constants.TABLE_TASK_HIGHLIGHT_COLOR)
     
 
 @app.command("showtag")
@@ -547,6 +564,6 @@ def show_tag():
             print(tag)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(err_msg, type="error")
     else:
         print(resp)

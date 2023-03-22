@@ -39,8 +39,8 @@ def category_callback(ctx: typer.Context, param: typer.CallbackParam, value: str
 @app.command("showcat")
 def show_categories():
     cats_dict = category_api.get_categories()
-    text = Align.center("[bold red]Task Categories[/bold red]")
-    display_utils.center_print(text, constants.DISPLAY_TERMINAL_COLOR_TITLE)
+    text = "Task Categories"
+    display_utils.center_print(text, type='title')
     display_utils.display_categories(cats_dict)
     
 
@@ -51,32 +51,32 @@ def add_category(
 ):
     resp = category_api.add_category(cat, color)
     if resp.status_code == 201:
-        display_utils.center_print("Task added successfully!", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)
+        display_utils.center_print("Task added successfully!", type="success")
         cats_dict = category_api.get_categories()
         display_utils.display_categories(cats_dict, highlight_cat=cat)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(err_msg, type="error")
     else:
         print(resp)
     
     
 @app.command("rmcat")
 def remove_category(cat: str = typer.Argument(..., help="Category path - xx/yy/zz..")):
-    confirm_rm = typer.confirm(f"[WARNING] Are you sure to delete '{cat}'?\nAll the subdirectories will also be deleted.")
+    confirm_rm = typer.confirm(f"[WARNING] Are you sure to delete '{cat}'?\nAll the subcategories and tasks will also be deleted.")
     if not confirm_rm:
         exit(0)
         
     resp = category_api.remove_category(cat)
     if resp.status_code == 204:
-        display_utils.center_print(f"Deleted {cat} successfully.", constants.DISPLAY_TERMINAL_COLOR_SUCCESS)
+        display_utils.center_print(f"Deleted {cat} successfully.", type="success")
         cats_dict = category_api.get_categories()
         display_utils.display_categories(cats_dict)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(err_msg, type="error")
     else:
-        display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(resp.content, type="error")
         
         
 @app.command("rncat")
@@ -87,14 +87,14 @@ def rename_category(
     resp = category_api.rename_category(cat, new_name)
     if resp.status_code == 204:
         new_cat = '/'.join(cat.split('/')[:-1] + [new_name])
-        display_utils.center_print(f"Successfully renamed {cat} to {new_cat}.", "black on green")
+        display_utils.center_print(f"Successfully renamed {cat} to {new_cat}.", type="success")
         cats_dict = category_api.get_categories()
         display_utils.display_categories(cats_dict, highlight_cat=new_cat)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(err_msg, type="error")
     else:
-        display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(resp.content, type="error")
         
         
 @app.command("mvcat")
@@ -107,14 +107,14 @@ def move_category(
     resp = category_api.move_category(cat, new_parent_cat)
     if resp.status_code == 200:
         new_cat = '/'.join(new_parent_cat.split('/') + [cat.split('/')[-1]])
-        display_utils.center_print(f"Successfully moved {cat} to {new_parent_cat}.\nNew path is {new_cat}", "black on green")
+        display_utils.center_print(f"Successfully moved {cat} to {new_parent_cat}/.", type="success")
         cats_dict = category_api.get_categories()
         display_utils.display_categories(cats_dict, highlight_cat=new_cat)
     elif resp.status_code == 400:
         err_msg = general_utils.bytes2dict(resp.content)['detail']
-        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(err_msg, type="error")
     else:
-        display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+        display_utils.center_print(resp.content, type="error")
     
 
 @app.command("open")

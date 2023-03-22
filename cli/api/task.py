@@ -30,6 +30,22 @@ def create_task(task_data: dict):
         display_utils.center_print("Error occurred.", constants.DISPLAY_TERMINAL_COLOR_ERROR)
         
 
+def get_single_task(task_id: int):
+    resp = requests.get(
+        cfg.base_url + f"/tasks/{task_id}",
+        headers=auth_utils.build_jwt_header(cfg.config_path),
+    )
+    if resp.status_code == 200:
+        task = general_utils.bytes2dict(resp.content)
+        return task
+    elif resp.status_code == 400:
+        err_msg = general_utils.bytes2dict(resp.content)['detail']
+        display_utils.center_print(err_msg, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+    else:
+        display_utils.center_print(resp.content, constants.DISPLAY_TERMINAL_COLOR_ERROR)
+ 
+
+
 def get_tasks(
     cats: Union[list, None] = None,
     start_date: Union[str, None] = None,

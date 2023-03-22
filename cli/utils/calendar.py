@@ -62,31 +62,23 @@ def get_date_obj_from_str_separated_by_T(s: str):
     return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
 
 
-def remove_left_arrow(cell, cell3=None):
-    log("REMOVE CELL", cell)
+def remove_left_arrow(cell):
     if not cell.children:
         return
     cell_label = cell.children[0]
     cell_label_text = cell_label.render()
     style = cell_label_text.style
-    log("REMOVE CELL LABEL TEXT", cell_label_text)
     if str(cell_label_text).endswith(" " + constants.LEFT_ARROW_EMOJI):
-        style = cell_label_text.spans[0].style        
+        style = cell_label_text.spans[0].style
         
     if str(cell_label_text).endswith(" " + constants.LEFT_ARROW_EMOJI):
         new_label_text = Text(str(cell_label_text)[:2], style=style)
     else:
         new_label_text = Text(str(cell_label_text), style=style)
-    log("NEW_LABEL_TEXT", new_label_text)
-    if cell3:
-        log("CELL3", cell3.children[0].render())
     cell_label.update(new_label_text)
-    if cell3:
-        log("CELL3", cell3.children[0].render())
     
     
 def add_left_arrow(cell):
-    log("ADD")
     if not cell.children:
         return
     
@@ -94,40 +86,46 @@ def add_left_arrow(cell):
     cell_label_text = cell_label.render()
     # style_str = str(cell_label_text.style)
     style = cell_label_text.style
-    log("STYLE", style)
     
     if str(cell_label_text).endswith(" " + constants.LEFT_ARROW_EMOJI):
         new_label_text = Text(str(cell_label_text), style=style)
     else:
         new_label_text = Text.assemble(Text(str(cell_label_text), style=style), " ", Text(constants.LEFT_ARROW_EMOJI, style=Style(color="red")))
-    print("TO BE UPDATED", new_label_text.style)
     cell_label.update(new_label_text)
     
 
 def remove_left_arrow_tree(node):
-    style = node._label.style
-    label_text = str(node._label)
-    log("REMOVE", label_text, style)
-    if label_text.endswith(" " + constants.LEFT_ARROW_EMOJI):
-        label = Text(label_text[:-2], style=style)
-        node.set_label(label)
+    label_text = node.label
+    style = label_text.style
+    if str(label_text).endswith(" " + constants.LEFT_ARROW_EMOJI):
+        new_label_text = Text(str(label_text)[:-2], style=style)
     else:
-        pass
+        new_label_text = Text(str(label_text), style=style)
+    log(f"NEW STYLE {new_label_text.style} NEW STYLE")
+
+    node.set_label(new_label_text)
     
 def add_left_arrow_tree(node):
-    style = node._label.style
-    label = Text(str(node._label), style=style)
-    if str(label).endswith(" " + constants.LEFT_ARROW_EMOJI):
+    label_text = node.label
+    style = label_text.style
+    log("ADD LEFT ARROW TREE STYLE", style)
+    # label = Text(str(node._label), style=style)
+    if str(label_text).endswith(" " + constants.LEFT_ARROW_EMOJI):
         pass
     else:
-        node.set_label(Text.assemble(label, " ", constants.LEFT_ARROW_EMOJI))
+        node.set_label(Text.assemble(label_text, " ", constants.LEFT_ARROW_EMOJI, style=style))
         
     
 def remove_highlight(node):
-    label = str(node._label)
-    node.set_label(str(label))
+    log(f"REMOVED HIGHLIGHT FROM {node}")
+    label_text = node.label
+    style = label_text.style
+    node.set_label(Text(str(label_text)))
+    log("REMOVED HIGHLIGHT NODE", node.label, node.label.style)
     
     
 def add_highlight(node):
-    label = str(node._label)
+    log(f"ADDED HIGHLIGHT TO {node}")
+    label = str(node.label)
     node.set_label(Text(label, style=Style(color="#9bdfbb")))
+    log("ADDED HIGHLIGHT NODE", node.label, node.label.style)

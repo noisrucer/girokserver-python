@@ -8,6 +8,7 @@ from textual.widget import Widget
 from textual.messages import Message
 from textual import log
 from textual.reactive import var, reactive
+from textual.pilot import Pilot
 from rich.text import Text
 from rich.table import Table
 from rich.style import Style
@@ -41,6 +42,7 @@ class Entry(App):
         ("f", "toggle_files", "Toggle Files")
     ]
     show_sidebar = reactive(True)
+    pilot = None
     
     def on_mount(self):
         self.set_focus(self.query_one(CategoryTree))
@@ -90,9 +92,15 @@ class Entry(App):
     def action_focus_on_calendar(self):
         if self.is_pop_up:
             return
-        cal = self.query_one(Calendar)
         self.set_focus(self.query_one(Calendar))
         self.current_focused = "Calendar"
+        
+        cat_tree = self.query_one(CategoryTree)
+        tag_tree = self.query_one(TagTree)
+        calendar_utils.remove_left_arrow_tree(cat_tree.highlighted_node)
+        calendar_utils.remove_left_arrow_tree(tag_tree.highlighted_node)
+        calendar_utils.remove_highlight(cat_tree.highlighted_node)
+        calendar_utils.remove_highlight(tag_tree.highlighted_node)
         
     def action_focus_on_sidebar(self):
         if self.is_pop_up:
@@ -102,10 +110,27 @@ class Entry(App):
         
         cal = self.query_one(Calendar)
         
-        cell3 = self.query_one("#cell3")
+        # self.pilot.hover(Calendar)
+        
         if self.is_pop_up:
             return
-        calendar_utils.remove_left_arrow(cal.cur_focused_cell, cell3)
+        
+        cat_tree = self.query_one(CategoryTree)
+        calendar_utils.remove_left_arrow(cal.cur_focused_cell)
+        calendar_utils.add_highlight(cat_tree.highlighted_node)
+        
+        ############# UNKNOWN ERROR - Temporary Fix ############
+        ngbrs = [self.query_one("#cell0"), self.query_one("#cell1"), self.query_one("#cell2"), self.query_one("#cell3"), self.query_one("#cell4"), self.query_one("#cell5"), self.query_one("#cell6")]
+        for ngbr_cell in ngbrs:
+            temp = []
+            while ngbr_cell.children:
+                child = ngbr_cell.children[0]
+                temp.append(child.render())
+                child.remove()
+                
+            for child in temp:
+                ngbr_cell.mount(Static(child))
+        ######################################################
         
     def action_move_down_to_tag_tree(self):
         if self.is_pop_up:
@@ -150,5 +175,7 @@ class Entry(App):
         else:
             sidebar_container.styles.display = "none"
             
+            
 if __name__ == '__main__':
-    Entry().run()
+   app = Entry()
+   app.run()

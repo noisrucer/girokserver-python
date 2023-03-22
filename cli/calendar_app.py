@@ -29,4 +29,9 @@ class CalendarApp(Horizontal):
         tag = event.tag
         if tag.endswith(" " + constants.LEFT_ARROW_EMOJI):
             tag = tag[:-2]
+        if tag == "All Tags":
+            tag = ""
         self.query_one(CalendarContainer).update_tag(tag)
+        
+    def on_category_tree_custom_test_message(self, event):
+        self.refresh()
