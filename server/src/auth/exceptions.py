@@ -31,3 +31,15 @@ class InvalidVerificationCode(HTTPException):
     def __init__(self):
         self.status_code = status.HTTP_401_UNAUTHORIZED
         self.detail = "Incorrect verification code"
+
+
+class ExpiredSignatureToken(HTTPException):
+    def __init__(self):
+        self.status_code = status.HTTP_401_UNAUTHORIZED
+        self.detail = "Expired signature token"
+        
+        
+class InvalidTokenType(HTTPException):
+    def __init__(self):
+        self.status_code = status.HTTP_401_UNAUTHORIZED
+        self.detail = "Incorrect token type"

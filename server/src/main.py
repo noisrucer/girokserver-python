@@ -10,7 +10,7 @@ import server.src.user.models as user_models
 import server.src.auth.models as auth_models
 
 user_models.Base.metadata.create_all(bind=engine)
-auth_models.Base.metadata.create_all(bind=engine)
+# auth_models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

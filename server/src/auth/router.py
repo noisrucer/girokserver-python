@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, status, Depends, BackgroundTasks, HTTPException
+from fastapi import APIRouter, status, Depends, BackgroundTasks, HTTPException, Security
 from email_validator import validate_email, EmailNotValidError
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 from pydantic import EmailStr
 
@@ -21,6 +21,8 @@ from server.src.auth.config import get_jwt_settings
 
 
 jwt_settings = get_jwt_settings()
+
+security = HTTPBearer()
 
 router = APIRouter(
     prefix="",
@@ -96,23 +98,9 @@ async def login(
     user = service.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise exceptions.InvalidEmailOrPasswordException()
-    
-    refresh_token_check = db.query(models.RefreshToken).filter(models.RefreshToken.email==user.email)
-    if refresh_token_check.first():
-        refresh_token_check.delete()
-        db.commit()
         
     access_token = utils.create_access_token(data={"sub": user.email})
     refresh_token = utils.create_refresh_token(data={"sub": user.email})
-    
-    refresh_token_dict = {
-        "email": user.email,
-        "refresh_token": refresh_token
-    }
-    
-    refresh_token_db = models.RefreshToken(**refresh_token_dict)
-    db.add(refresh_token_db)
-    db.commit()
     
     return {
         "access_token": access_token,
@@ -121,17 +109,12 @@ async def login(
         }
 
 
-@router.get("/refresh", status_code=status.HTTP_200_OK, response_model=schemas.Token)
-async def get_new_access_token(token: str):
-    token_data = utils.verify_refresh_token(token)
-    
-    new_access_token = utils.create_access_token(data={"sub": token_data.username})
-    
-    return {
-        "access_token": new_access_token,
-        "refresh_token": token,
-        "token_type": "Bearer", 
-    }
+@router.get("/update_access_token")
+def update_access_token(user_email = Depends(utils.auth_refresh_wrapper)):
+    if user_email is None:
+        raise exceptions.CredentialsException()
+    new_token = utils.create_access_token({"sub": user_email})
+    return {"access_token": new_token}
 
 
 @router.get("/validate-access-token", dependencies=[Depends(glob_dependencies.get_current_user)])

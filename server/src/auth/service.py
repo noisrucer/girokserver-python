@@ -23,6 +23,11 @@ def get_current_active_user(db: Session, email: EmailStr, is_activate: bool):
     return db.query(user_models.User).filter(user_models.User.email == email, user_models.User.is_activate == is_activate).first()
 
 
+def get_refresh_token(db: Session, email: EmailStr):
+    user = db.query(user_models.User).filter(user_models.User.email == email).first()
+    return user.refresh_token
+
+
 def authenticate_user(db: Session, email: str, password: str):
     try:
         validation = validate_email(email)
