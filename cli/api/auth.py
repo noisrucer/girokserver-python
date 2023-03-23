@@ -1,6 +1,8 @@
 import requests
+from config import get_config
+cfg = get_config()
 
-base_url = "http://localhost:8000"
+base_url = cfg.base_url 
 
 def register(email, password):
     resp = requests.post(base_url + "/register", json={
@@ -27,5 +29,6 @@ def validate_access_token(access_token):
         }
     }
     
+
     resp = requests.get(base_url + "/validate-access-token", headers=options['headers'])
     return resp
