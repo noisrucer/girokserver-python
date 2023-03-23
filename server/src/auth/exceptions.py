@@ -27,7 +27,7 @@ class InvalidEmailOrPasswordException(HTTPException):
         self.headers = {"WWW-Authenticate": "Bearer"}
         
         
-class AlreadyAuthenticationCodeSent(HTTPException):
-    def __init__(self, email: str):
-        self.status_code = status.HTTP_400_BAD_REQUEST
-        self.detail = "The authentication code has already been sent."
+class InvalidVerificationCode(HTTPException):
+    def __init__(self):
+        self.status_code = status.HTTP_401_UNAUTHORIZED
+        self.detail = "Incorrect verification code"

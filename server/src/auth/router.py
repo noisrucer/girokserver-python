@@ -66,7 +66,7 @@ async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, 
     
     return new_user
 
-# 코드가 틀렸거나 없는 이메일이라면 오류를 내는 방식을 바꿔야함
+
 @router.post("/register/verification_code", status_code=status.HTTP_200_OK)
 async def verify_email(user: schemas.VerificationCode, db: Session = Depends(get_db)):
     user_dict = user.dict()
@@ -74,10 +74,10 @@ async def verify_email(user: schemas.VerificationCode, db: Session = Depends(get
     user = db.query(user_models.User).filter(user_models.User.email == user_dict['email']).first()
     
     if service.get_current_active_user(db ,email=user_dict['email'], is_activate=True):
-        raise exceptions.EmailAlreadyExistsException(email=user_dict['email'])   
+        raise exceptions.EmailAlreadyExistsException(email=user_dict['email'])
     
     if not utils.verify_code(user_dict['verification_code'], user.verification_code):
-        return False
+        raise exceptions.InvalidVerificationCode()
 
     user.is_activate = True
     
@@ -121,7 +121,7 @@ async def login(
         }
 
 
-@router.get("/refresh", status_code=status.HTTP_200_OK, dependencies=[Depends(glob_dependencies.get_current_user)], response_model=schemas.Token)
+@router.get("/refresh", status_code=status.HTTP_200_OK, response_model=schemas.Token)
 async def get_new_access_token(token: str):
     token_data = utils.verify_refresh_token(token)
     
