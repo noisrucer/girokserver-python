@@ -19,14 +19,14 @@ import api.category as category_api
 import utils.calendar as calendar_utils
 import utils.display as display_utils
 
-from calendar_app import CalendarApp
-from calendar_container import CalendarContainer, Calendar
-from sidebar import CategoryTree, SidebarContainer, TagTree
+from calendar_cli.calendar_app import CalendarApp
+from calendar_cli.calendar_container import CalendarContainer, Calendar
+from calendar_cli.sidebar import CategoryTree, SidebarContainer, TagTree
 import constants
 
 
 class Entry(App):
-    CSS_PATH = "./demo_dock.css"
+    CSS_PATH = "./calendar_main.css"
     current_focused = "CategoryTree"
     is_pop_up = False
     BINDINGS = [

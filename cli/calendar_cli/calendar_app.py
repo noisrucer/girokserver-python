@@ -10,8 +10,8 @@ from rich.table import Table
 from rich.style import Style
 from textual import log
 
-from sidebar import SidebarContainer, CategoryTree
-from calendar_container import CalendarContainer
+from calendar_cli.sidebar import SidebarContainer, CategoryTree
+from calendar_cli.calendar_container import CalendarContainer
 import constants
         
 class CalendarApp(Horizontal):

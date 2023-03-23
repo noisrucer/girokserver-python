@@ -21,7 +21,7 @@ import utils.calendar as calendar_utils
 import utils.general as general_utils
 import utils.task as task_utils
 import constants as constants
-from sidebar import CategoryTree, TagTree
+from calendar_cli.sidebar import CategoryTree, TagTree
 
 
 class WeekdayBarContainer(Horizontal):
