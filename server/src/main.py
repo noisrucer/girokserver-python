@@ -11,7 +11,6 @@ import server.src.user.models as user_models
 
 user_models.Base.metadata.create_all(bind=engine)
 
-
 app = FastAPI()
 
 app.add_middleware(
