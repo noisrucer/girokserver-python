@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from server.src.database import engine
 from server.src.auth.router import router as auth_router
 from server.src.category.router import router as category_router
+from server.src.task.router import router as task_router
 import server.src.user.models as user_models
 import server.src.auth.models as auth_models
 
@@ -23,6 +24,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(category_router)
+app.include_router(task_router)
 
 @app.get("/")
 async def root():

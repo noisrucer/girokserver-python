@@ -14,3 +14,4 @@ class User(Base):
     is_activate = Column(Boolean(), default=False)
     verification_code = Column(String(100), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    category = relationship("TaskCategory", cascade="all,delete", backref="user")

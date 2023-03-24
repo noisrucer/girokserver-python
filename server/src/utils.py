@@ -58,17 +58,7 @@ def sql_obj_to_dict(sql_obj):
     return {col.name: getattr(sql_obj, col.name) for col in sql_obj.__table__.columns}
 
 
-def count_letter_group_num(gpa_obj: dict, letter: str):
-    if letter == 'A':
-        return gpa_obj['A+'] + gpa_obj['A'] + gpa_obj['A-']
-    elif letter == 'B':
-        return gpa_obj['B+'] + gpa_obj['B'] + gpa_obj['B-']
-    elif letter == 'C':
-        return gpa_obj['C+'] + gpa_obj['C'] + gpa_obj['C-']
-    elif letter == 'D':
-        return gpa_obj['D+'] + gpa_obj['D']
-    else: # F
-        return gpa_obj['F']
+
         
     
         

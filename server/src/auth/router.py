@@ -23,6 +23,7 @@ from server.src.auth.config import get_jwt_settings
 jwt_settings = get_jwt_settings()
 
 security = HTTPBearer()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 router = APIRouter(
     prefix="",
@@ -67,6 +68,7 @@ async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, 
     db.refresh(new_user)
     
     return new_user
+
 
 
 @router.post("/register/verification_code", status_code=status.HTTP_200_OK)
@@ -117,6 +119,6 @@ def update_access_token(user_email = Depends(utils.auth_refresh_wrapper)):
     return {"access_token": new_token}
 
 
-@router.get("/validate-access-token", dependencies=[Depends(glob_dependencies.get_current_user)])
-async def validate_jwt():
-    return {"detail": "validated"}
+@router.get("/validate-access-token")
+async def validate_jwt(current_user: user_models.User = Depends(glob_dependencies.get_current_user)):
+    return {"current_user_email": current_user.email}
