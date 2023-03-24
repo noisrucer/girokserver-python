@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from server.src.config import get_db_settings
 db_settings = get_db_settings()
 
-SQLAHCEMY_DATABASE_URL = f"mysql+pymysql://{db_settings.MYSQL_USERNAME}:{db_settings.MYSQL_PASSWORD}@{db_settings.MYSQL_HOST}/{db_settings.MYSQL_DB_NAME}"
+SQLAHCEMY_DATABASE_URL = f"mysql+pymysql://{db_settings.MYSQL_USERNAME}:{db_settings.MYSQL_PASSWORD}@{db_settings.MYSQL_HOST}:3306/{db_settings.MYSQL_DB_NAME}"
 
 engine = create_engine(SQLAHCEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
