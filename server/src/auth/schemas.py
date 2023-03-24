@@ -14,12 +14,19 @@ import server.src.user.schemas as user_schemas
 class UserCreate(user_schemas.UserBase):
     password: str = Field(default=..., min_length=4, max_length=30)
     
+
 class UserCreateOut(user_schemas.UserBase):
     user_id: int
     
     class Config:
         orm_mode = True
-        
+
+
+class VerificationCode(BaseModel):
+    email: str
+    verification_code: str = Field(default=..., max_length=6)
+    
+
 class VerifyEmail(BaseModel):
     email: str
     
@@ -35,7 +42,12 @@ class VerifyEmail(BaseModel):
     
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
+    
+
+class UpdateToken(BaseModel):
+    access_token: str
 
 
 class TokenData(BaseModel):

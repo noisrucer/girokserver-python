@@ -22,4 +22,3 @@ class TaskNotFoundException(HTTPException):
         self.status_code = status.HTTP_400_BAD_REQUEST
         self.detail = f"Task id {task_id} is not found."
 
-    

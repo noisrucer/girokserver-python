@@ -8,6 +8,7 @@ from server.src.auth.router import router as auth_router
 from server.src.category.router import router as category_router
 from server.src.task.router import router as task_router
 import server.src.user.models as user_models
+import server.src.auth.models as auth_models
 
 user_models.Base.metadata.create_all(bind=engine)
 
