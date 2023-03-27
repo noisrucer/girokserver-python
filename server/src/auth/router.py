@@ -1,4 +1,5 @@
 from datetime import timedelta
+import requests
 
 from fastapi import APIRouter, status, Depends, BackgroundTasks, HTTPException, Security
 from email_validator import validate_email, EmailNotValidError
@@ -23,7 +24,7 @@ from server.src.auth.config import get_jwt_settings
 jwt_settings = get_jwt_settings()
 
 security = HTTPBearer()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 router = APIRouter(
     prefix="",
@@ -45,7 +46,7 @@ async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, 
         db.commit()
     
     # Send verification code
-    verification_code = utils.generate_verification_code(len=6)
+    verification_code = utils.generate_verification_code(token_len=6)
     recipient = user_dict['email']
     subject="[Girok] Please verify your email address"
     content = utils.read_html_content_and_replace(
@@ -102,21 +103,21 @@ async def login(
         raise exceptions.InvalidEmailOrPasswordException()
         
     access_token = utils.create_access_token(data={"sub": user.email})
-    refresh_token = utils.create_refresh_token(data={"sub": user.email})
+    # refresh_token = utils.create_refresh_token(data={"sub": user.email})
     
     return {
         "access_token": access_token,
-        "token_type": "bearer",
-        "refresh_token": refresh_token
+        "token_type": "bearer"
+        # "refresh_token": refresh_token
         }
 
 
-@router.get("/update_access_token")
-def update_access_token(user_email = Depends(utils.auth_refresh_wrapper)):
-    if user_email is None:
-        raise exceptions.CredentialsException()
-    new_token = utils.create_access_token({"sub": user_email})
-    return {"access_token": new_token}
+# @router.get("/update_access_token")
+# def update_access_token(user_email = Depends(utils.auth_refresh_wrapper)):
+#     if user_email is None:
+#         raise exceptions.CredentialsException()
+#     new_token = utils.create_access_token({"sub": user_email})
+#     return {"access_token": new_token}
 
 
 @router.get("/validate-access-token")

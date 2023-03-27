@@ -38,6 +38,8 @@ def authenticate_user(db: Session, email: str, password: str):
     user = db.query(user_models.User).filter(user_models.User.email == email).first()
     if not user:
         return False
+    if not user.is_activate:
+        raise exceptions.EmailNotValidatedException()
     if not utils.verify_password(password, user.password):
         raise exceptions.InvalidEmailOrPasswordException()
     return user

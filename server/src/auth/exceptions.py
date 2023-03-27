@@ -25,6 +25,11 @@ class InvalidEmailOrPasswordException(HTTPException):
         self.status_code = status.HTTP_401_UNAUTHORIZED
         self.detail = "Incorrect email or password"
         self.headers = {"WWW-Authenticate": "Bearer"}
+
+class EmailNotValidatedException(HTTPException):
+    def __init__(self):
+        self.status_code = status.HTTP_401_UNAUTHORIZED
+        self.detail = "Please validate your email account first"
         
         
 class InvalidVerificationCode(HTTPException):

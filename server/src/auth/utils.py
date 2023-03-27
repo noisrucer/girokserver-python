@@ -25,9 +25,9 @@ def verify_password(raw_password, hashed_password):
     return pwd_context.verify(raw_password, hashed_password)
 
 
-def generate_verification_code(len=6):
+def generate_verification_code(token_len=6):
     return ''.join(
-        random.choice(string.ascii_uppercase + string.digits) for _ in range(len))
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(token_len))
 
 
 def hash_verification_code(raw_verification_code):
