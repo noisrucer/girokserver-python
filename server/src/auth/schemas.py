@@ -12,7 +12,7 @@ import server.src.user.schemas as user_schemas
     
 
 class UserCreate(user_schemas.UserBase):
-    password: str = Field(default=..., min_length=4, max_length=30)
+    password: str = Field(default=...)
     @validator("password")
     def password_must_be_valid(cls, v):
         if len(v) > 30 or len(v) < 6:
