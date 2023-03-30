@@ -64,9 +64,14 @@ class TagOut(BaseModel):
 class ChangeTaskTagIn(BaseModel):
     new_tag_name: str
 
+
 class ChangeTaskPriorityIn(BaseModel):
     new_priority: int = Field(ge=1, le=5)
 
 
 class ChangeTaskDateIn(BaseModel):
     new_date: str = Field(default=..., regex="^([0-9]){4}-([0-9]){1,2}-([0-9]){1,2} [0-9]{2}:[0-9]{2}:[0-9]{2}$")
+
+
+class ChangeTaskNameIn(BaseModel):
+    new_name: str

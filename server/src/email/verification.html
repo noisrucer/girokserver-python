@@ -1,385 +1,742 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+>
   <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>Email Confirmation</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--[if gte mso 9]>
+      <xml>
+        <o:OfficeDocumentSettings>
+          <o:AllowPNG />
+          <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+      </xml>
+    <![endif]-->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <!--[if !mso]><!-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--<![endif]-->
+    <title></title>
+
     <style type="text/css">
-      /**
-   * Google webfonts. Recommended to include the .woff version for cross-client compatibility.
-   */
-      @media screen {
-        @font-face {
-          font-family: "Source Sans Pro";
-          font-style: normal;
-          font-weight: 400;
-          src: local("Source Sans Pro Regular"), local("SourceSansPro-Regular"),
-            url(https://fonts.gstatic.com/s/sourcesanspro/v10/ODelI1aHBYDBqgeIAH2zlBM0YzuT7MdOe03otPbuUS0.woff)
-              format("woff");
+      @media only screen and (min-width: 620px) {
+        .u-row {
+          width: 600px !important;
         }
-        @font-face {
-          font-family: "Source Sans Pro";
-          font-style: normal;
-          font-weight: 700;
-          src: local("Source Sans Pro Bold"), local("SourceSansPro-Bold"),
-            url(https://fonts.gstatic.com/s/sourcesanspro/v10/toadOcfmlt9b38dHJxOBGFkQc6VGVFSmCnC_l7QZG60.woff)
-              format("woff");
+        .u-row .u-col {
+          vertical-align: top;
+        }
+        .u-row .u-col-100 {
+          width: 600px !important;
         }
       }
-      /**
-   * Avoid browser level font resizing.
-   * 1. Windows Mobile
-   * 2. iOS / OSX
-   */
-      body,
-      table,
-      td,
-      a {
-        -ms-text-size-adjust: 100%; /* 1 */
-        -webkit-text-size-adjust: 100%; /* 2 */
+
+      @media (max-width: 620px) {
+        .u-row-container {
+          max-width: 100% !important;
+          padding-left: 0px !important;
+          padding-right: 0px !important;
+        }
+        .u-row .u-col {
+          min-width: 320px !important;
+          max-width: 100% !important;
+          display: block !important;
+        }
+        .u-row {
+          width: 100% !important;
+        }
+        .u-col {
+          width: 100% !important;
+        }
+        .u-col > div {
+          margin: 0 auto;
+        }
       }
-      /**
-   * Remove extra space added to tables and cells in Outlook.
-   */
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
       table,
+      tr,
       td {
-        mso-table-rspace: 0pt;
-        mso-table-lspace: 0pt;
+        vertical-align: top;
+        border-collapse: collapse;
       }
-      /**
-   * Better fluid images in Internet Explorer.
-   */
-      img {
-        -ms-interpolation-mode: bicubic;
+
+      p {
+        margin: 0;
       }
-      /**
-   * Remove blue links for iOS devices.
-   */
-      a[x-apple-data-detectors] {
-        font-family: inherit !important;
-        font-size: inherit !important;
-        font-weight: inherit !important;
-        line-height: inherit !important;
+
+      .ie-container table,
+      .mso-container table {
+        table-layout: fixed;
+      }
+
+      * {
+        line-height: inherit;
+      }
+
+      a[x-apple-data-detectors="true"] {
         color: inherit !important;
         text-decoration: none !important;
       }
-      /**
-   * Fix centering issues in Android 4.4.
-   */
-      div[style*="margin: 16px 0;"] {
-        margin: 0 !important;
-      }
-      body {
-        width: 100% !important;
-        height: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-      /**
-   * Collapse table borders to avoid space between cells.
-   */
-      table {
-        border-collapse: collapse !important;
-      }
-      a {
-        color: #1a82e2;
-      }
-      img {
-        height: auto;
-        line-height: 100%;
-        text-decoration: none;
-        border: 0;
-        outline: none;
+
+      table,
+      td {
+        color: #000000;
       }
 
-      .tooltip {
-  position: relative;
-  display: inline-block;
-}
-
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: 140px;
-  background-color: #555;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  bottom: 150%;
-  left: 50%;
-  margin-left: -75px;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.tooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #555 transparent transparent transparent;
-}
-
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
-}
+      #u_body a {
+        color: #0000ee;
+        text-decoration: underline;
+      }
     </style>
+
+    <!--[if !mso]><!-->
+    <link
+      href="https://fonts.googleapis.com/css?family=Cabin:400,700"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <!--<![endif]-->
   </head>
-  <body style="background-color: #e9ecef">
-    <!-- start preheader -->
-    <div
-      class="preheader"
+
+  <body
+    class="clean-body u_body"
+    style="
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      background-color: #f9f9f9;
+      color: #000000;
+    "
+  >
+    <!--[if IE]><div class="ie-container"><![endif]-->
+    <!--[if mso]><div class="mso-container"><![endif]-->
+    <table
+      id="u_body"
       style="
-        display: none;
-        max-width: 0;
-        max-height: 0;
-        overflow: hidden;
-        font-size: 1px;
-        line-height: 1px;
-        color: #fff;
-        opacity: 0;
+        border-collapse: collapse;
+        table-layout: fixed;
+        border-spacing: 0;
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+        vertical-align: top;
+        min-width: 320px;
+        margin: 0 auto;
+        background-color: #f9f9f9;
+        width: 100%;
       "
+      cellpadding="0"
+      cellspacing="0"
     >
-      A preheader is the short summary text that follows the subject line when
-      an email is viewed in the inbox.
-    </div>
-    <!-- end preheader -->
-
-    <!-- start body -->
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-      <!-- start logo -->
-      <tr>
-        <td align="center" bgcolor="#e9ecef">
-          <!--[if (gte mso 9)|(IE)]>
-        <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
-        <tr>
-        <td align="center" valign="top" width="600">
-        <![endif]-->
-          <table
-            border="0"
-            cellpadding="0"
-            cellspacing="0"
-            width="100%"
-            style="max-width: 600px"
+      <tbody>
+        <tr style="vertical-align: top">
+          <td
+            style="
+              word-break: break-word;
+              border-collapse: collapse !important;
+              vertical-align: top;
+            "
           >
-            <tr>
-              <td align="center" valign="top" style="padding: 36px 24px">
-                <a
-                  href="https://www.blogdesire.com"
-                  target="_blank"
-                  style="display: inline-block"
-                >
-                  <img
-                    src="https://www.blogdesire.com/wp-content/uploads/2019/07/blogdesire-1.png"
-                    alt="Logo"
-                    border="0"
-                    width="48"
-                    style="
-                      display: block;
-                      width: 48px;
-                      max-width: 48px;
-                      min-width: 48px;
-                    "
-                  />
-                </a>
-              </td>
-            </tr>
-          </table>
-          <!--[if (gte mso 9)|(IE)]>
-        </td>
-        </tr>
-        </table>
-        <![endif]-->
-        </td>
-      </tr>
-      <!-- end logo -->
+            <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="background-color: #f9f9f9;"><![endif]-->
 
-      <!-- start hero -->
-      <tr>
-        <td align="center" bgcolor="#e9ecef">
-          <!--[if (gte mso 9)|(IE)]>
-        <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
-        <tr>
-        <td align="center" valign="top" width="600">
-        <![endif]-->
-          <table
-            border="0"
-            cellpadding="0"
-            cellspacing="0"
-            width="100%"
-            style="max-width: 600px"
-          >
-            <tr>
-              <td
-                align="left"
-                bgcolor="#ffffff"
+            <div
+              class="u-row-container"
+              style="padding: 0px; background-color: transparent"
+            >
+              <div
+                class="u-row"
                 style="
-                  padding: 36px 24px 0;
-                  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
-                  border-top: 3px solid #d4dadf;
+                  margin: 0 auto;
+                  min-width: 320px;
+                  max-width: 600px;
+                  overflow-wrap: break-word;
+                  word-wrap: break-word;
+                  word-break: break-word;
+                  background-color: #eb4747;
                 "
               >
-                <h1
+                <div
                   style="
-                    margin: 0;
-                    font-size: 32px;
-                    font-weight: 700;
-                    letter-spacing: -1px;
-                    line-height: 48px;
+                    border-collapse: collapse;
+                    display: table;
+                    width: 100%;
+                    height: 100%;
+                    background-color: transparent;
                   "
                 >
-                  Confirm Your Email Address
-                </h1>
-              </td>
-            </tr>
-          </table>
-          <!--[if (gte mso 9)|(IE)]>
-        </td>
-        </tr>
-        </table>
-        <![endif]-->
-        </td>
-      </tr>
-      <!-- end hero -->
+                  <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #eb4747;"><![endif]-->
 
-      <!-- start copy block -->
-      <tr>
-        <td align="center" bgcolor="#e9ecef">
-          <!--[if (gte mso 9)|(IE)]>
-        <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
-        <tr>
-        <td align="center" valign="top" width="600">
-        <![endif]-->
-          <table
-            border="0"
-            cellpadding="0"
-            cellspacing="0"
-            width="100%"
-            style="max-width: 600px"
-          >
-            <!-- start copy -->
-            <tr>
-              <td
-                align="left"
-                bgcolor="#ffffff"
+                  <!--[if (mso)|(IE)]><td align="center" width="600" style="width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
+                  <div
+                    class="u-col u-col-100"
+                    style="
+                      max-width: 320px;
+                      min-width: 600px;
+                      display: table-cell;
+                      vertical-align: top;
+                    "
+                  >
+                    <div style="height: 100%; width: 100% !important">
+                      <!--[if (!mso)&(!IE)]><!-->
+                      <div
+                        style="
+                          box-sizing: border-box;
+                          height: 100%;
+                          padding: 0px;
+                          border-top: 0px solid transparent;
+                          border-left: 0px solid transparent;
+                          border-right: 0px solid transparent;
+                          border-bottom: 0px solid transparent;
+                        "
+                      >
+                        <!--<![endif]-->
+
+                        <table
+                          style="font-family: 'Cabin', sans-serif"
+                          role="presentation"
+                          cellpadding="0"
+                          cellspacing="0"
+                          width="100%"
+                          border="0"
+                        >
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  overflow-wrap: break-word;
+                                  word-break: break-word;
+                                  padding: 40px 10px 10px;
+                                  font-family: 'Cabin', sans-serif;
+                                "
+                                align="left"
+                              >
+                                <table
+                                  width="100%"
+                                  cellpadding="0"
+                                  cellspacing="0"
+                                  border="0"
+                                >
+                                  <tr>
+                                    <td
+                                      style="
+                                        padding-right: 0px;
+                                        padding-left: 0px;
+                                      "
+                                      align="center"
+                                    >
+                                      <img
+                                        align="center"
+                                        border="0"
+                                        src="https://cdn.templates.unlayer.com/assets/1597218650916-xxxxc.png"
+                                        alt="Image"
+                                        title="Image"
+                                        style="
+                                          outline: none;
+                                          text-decoration: none;
+                                          -ms-interpolation-mode: bicubic;
+                                          clear: both;
+                                          display: inline-block !important;
+                                          border: none;
+                                          height: auto;
+                                          float: none;
+                                          width: 37%;
+                                          max-width: 214.6px;
+                                        "
+                                        width="214.6"
+                                      />
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <!--[if (!mso)&(!IE)]><!-->
+                      </div>
+                      <!--<![endif]-->
+                    </div>
+                  </div>
+                  <!--[if (mso)|(IE)]></td><![endif]-->
+                  <!--[if (mso)|(IE)]></tr></table></td></tr></table><![endif]-->
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="u-row-container"
+              style="padding: 0px; background-color: transparent"
+            >
+              <div
+                class="u-row"
                 style="
-                  padding: 24px;
-                  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
-                  font-size: 16px;
-                  line-height: 24px;
+                  margin: 0 auto;
+                  min-width: 320px;
+                  max-width: 600px;
+                  overflow-wrap: break-word;
+                  word-wrap: break-word;
+                  word-break: break-word;
+                  background-color: #ffffff;
                 "
               >
-                <p style="margin: 0">
-                  Please copy the verification code below and paste to the confirmation box.
-                </p>
-              </td>
-            </tr>
-            <!-- end copy -->
+                <div
+                  style="
+                    border-collapse: collapse;
+                    display: table;
+                    width: 100%;
+                    height: 100%;
+                    background-color: transparent;
+                  "
+                >
+                  <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #ffffff;"><![endif]-->
 
-            <!-- start button -->
-            <tr>
-              <td align="left" bgcolor="#ffffff">
-                <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                  <tr>
-                    <td align="center" bgcolor="#ffffff" style="padding: 12px">
-                      <table border="0" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td
-                            align="center"
-                            bgcolor="#1a82e2"
-                            style="border-radius: 6px"
-                          >
+                  <!--[if (mso)|(IE)]><td align="center" width="600" style="width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
+                  <div
+                    class="u-col u-col-100"
+                    style="
+                      max-width: 320px;
+                      min-width: 600px;
+                      display: table-cell;
+                      vertical-align: top;
+                    "
+                  >
+                    <div style="height: 100%; width: 100% !important">
+                      <!--[if (!mso)&(!IE)]><!-->
+                      <div
+                        style="
+                          box-sizing: border-box;
+                          height: 100%;
+                          padding: 0px;
+                          border-top: 0px solid transparent;
+                          border-left: 0px solid transparent;
+                          border-right: 0px solid transparent;
+                          border-bottom: 0px solid transparent;
+                        "
+                      >
+                        <!--<![endif]-->
 
-                            <button
-                              id="verificationCode"
-                              style="
-                                display: inline-block;
-                                padding: 16px 36px;
-                                font-family: 'Source Sans Pro', Helvetica, Arial,
-                                  sans-serif;
-                                font-size: 25px;
-                                color: black;
-                                text-decoration: none;
-                                border-radius: 6px;
-                              "
-                            >
-                              __VERIFICATION_CODE__
-                            </button>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-            <!-- end button -->
-            <!-- start copy -->
-            
+                        <table
+                          style="font-family: 'Cabin', sans-serif"
+                          role="presentation"
+                          cellpadding="0"
+                          cellspacing="0"
+                          width="100%"
+                          border="0"
+                        >
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  overflow-wrap: break-word;
+                                  word-break: break-word;
+                                  padding: 33px 55px;
+                                  font-family: 'Cabin', sans-serif;
+                                "
+                                align="left"
+                              >
+                                <div
+                                  style="
+                                    line-height: 130%;
+                                    text-align: center;
+                                    word-wrap: break-word;
+                                  "
+                                >
+                                  <p
+                                    style="line-height: 130%; text-align: left"
+                                  >
+                                    <span
+                                      style="
+                                        font-size: 36px;
+                                        line-height: 46.8px;
+                                      "
+                                      >Welcome to Girok!
+                                    </span>
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
 
-      <!-- start footer -->
-      <tr>
-        <td align="center" bgcolor="#e9ecef" style="padding: 24px">
-          <!--[if (gte mso 9)|(IE)]>
-        <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
-        <tr>
-        <td align="center" valign="top" width="600">
-        <![endif]-->
-          <table
-            border="0"
-            cellpadding="0"
-            cellspacing="0"
-            width="100%"
-            style="max-width: 600px"
-          >
-            <!-- start permission -->
-            <!-- end permission -->
+                        <table
+                          style="font-family: 'Cabin', sans-serif"
+                          role="presentation"
+                          cellpadding="0"
+                          cellspacing="0"
+                          width="100%"
+                          border="0"
+                        >
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  overflow-wrap: break-word;
+                                  word-break: break-word;
+                                  padding: 33px 55px;
+                                  font-family: 'Cabin', sans-serif;
+                                "
+                                align="left"
+                              >
+                                <div
+                                  style="
+                                    font-size: 19px;
+                                    line-height: 130%;
+                                    text-align: center;
+                                    word-wrap: break-word;
+                                  "
+                                >
+                                  <p
+                                    style="
+                                      font-size: 14px;
+                                      line-height: 130%;
+                                      text-align: left;
+                                    "
+                                  ></p>
+                                  <p
+                                    style="
+                                      font-size: 14px;
+                                      line-height: 130%;
+                                      text-align: left;
+                                    "
+                                  >
+                                    <span
+                                      style="
+                                        font-size: 20px;
+                                        line-height: 24.7px;
+                                      "
+                                      >You're almost ready to get started!
+                                    </span>
+                                    <br />
+                                    <br />
+                                    <span
+                                      style="
+                                        font-size: 20px;
+                                        line-height: 24.7px;
+                                      "
+                                      >Please confirm your email address by
+                                      entering the code below.
+                                    </span>
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
 
-            <!-- start unsubscribe -->
-            <tr>
+                        <table
+                          style="font-family: 'Cabin', sans-serif"
+                          role="presentation"
+                          cellpadding="0"
+                          cellspacing="0"
+                          width="100%"
+                          border="0"
+                        >
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  overflow-wrap: break-word;
+                                  word-break: break-word;
+                                  padding: 10px;
+                                  font-family: 'Cabin', sans-serif;
+                                "
+                                align="left"
+                              >
+                                <!--[if mso
+                                  ]><style>
+                                    .v-button {
+                                      background: transparent !important;
+                                    }
+                                  </style><!
+                                [endif]-->
+                                <div align="center">
+                                  <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="" style="height:45px; v-text-anchor:middle; width:225px;" arcsize="9%"  stroke="f" fillcolor="#eb4747"><w:anchorlock/><center style="color:#FFFFFF;font-family:'Cabin',sans-serif;"><![endif]-->
+                                  <a
+                                    href=""
+                                    target="_blank"
+                                    class="v-button"
+                                    style="
+                                      box-sizing: border-box;
+                                      display: inline-block;
+                                      font-family: 'Cabin', sans-serif;
+                                      text-decoration: none;
+                                      -webkit-text-size-adjust: none;
+                                      text-align: center;
+                                      color: #ffffff;
+                                      background-color: #eb4747;
+                                      border-radius: 4px;
+                                      -webkit-border-radius: 4px;
+                                      -moz-border-radius: 4px;
+                                      width: auto;
+                                      max-width: 100%;
+                                      overflow-wrap: break-word;
+                                      word-break: break-word;
+                                      word-wrap: break-word;
+                                      mso-border-alt: none;
+                                      font-size: 15px;
+                                    "
+                                  >
+                                    <span
+                                      style="
+                                        display: block;
+                                        padding: 14px 44px 13px;
+                                        line-height: 120%;
+                                      "
+                                      ><span style="line-height: 18px"
+                                        ><strong
+                                          ><span style="line-height: 18px"
+                                            >__VERIFICATION_CODE__</span
+                                          ></strong
+                                        >
+                                      </span>
+                                    </span>
+                                  </a>
+                                  <!--[if mso]></center></v:roundrect><![endif]-->
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
 
-                <p style="margin: 0">
-                  girok
-                </p>
-              </td>
-            </tr>
-            <!-- end unsubscribe -->
-          </table>
-          <!--[if (gte mso 9)|(IE)]>
-        </td>
+                        <table
+                          style="font-family: 'Cabin', sans-serif"
+                          role="presentation"
+                          cellpadding="0"
+                          cellspacing="0"
+                          width="100%"
+                          border="0"
+                        >
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  overflow-wrap: break-word;
+                                  word-break: break-word;
+                                  padding: 10px;
+                                  font-family: 'Cabin', sans-serif;
+                                "
+                                align="left"
+                              >
+                                <table
+                                  height="0px"
+                                  align="center"
+                                  border="0"
+                                  cellpadding="0"
+                                  cellspacing="0"
+                                  width="100%"
+                                  style="
+                                    border-collapse: collapse;
+                                    table-layout: fixed;
+                                    border-spacing: 0;
+                                    mso-table-lspace: 0pt;
+                                    mso-table-rspace: 0pt;
+                                    vertical-align: top;
+                                    border-top: 1px solid #eb4747;
+                                    -ms-text-size-adjust: 100%;
+                                    -webkit-text-size-adjust: 100%;
+                                  "
+                                >
+                                  <tbody>
+                                    <tr style="vertical-align: top">
+                                      <td
+                                        style="
+                                          word-break: break-word;
+                                          border-collapse: collapse !important;
+                                          vertical-align: top;
+                                          font-size: 0px;
+                                          line-height: 0px;
+                                          mso-line-height-rule: exactly;
+                                          -ms-text-size-adjust: 100%;
+                                          -webkit-text-size-adjust: 100%;
+                                        "
+                                      >
+                                        <span>&#160;</span>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table
+                          style="font-family: 'Cabin', sans-serif"
+                          role="presentation"
+                          cellpadding="0"
+                          cellspacing="0"
+                          width="100%"
+                          border="0"
+                        >
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  overflow-wrap: break-word;
+                                  word-break: break-word;
+                                  padding: 33px 55px;
+                                  font-family: 'Cabin', sans-serif;
+                                "
+                                align="left"
+                              >
+                                <div
+                                  style="
+                                    line-height: 100%;
+                                    text-align: center;
+                                    word-wrap: break-word;
+                                  "
+                                >
+                                  <p style="line-height: 100%">
+                                    <span
+                                      style="font-size: 18px; line-height: 18px"
+                                      >Want to know more about Girok? Visit
+                                      <a
+                                        href="https://github.com/noisrucer/girok"
+                                        style="
+                                          text-decoration: none;
+                                          color: blue;
+                                        "
+                                        ;
+                                        >Github</a
+                                      ></span
+                                    >
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <!--[if (!mso)&(!IE)]><!-->
+                      </div>
+                      <!--<![endif]-->
+                    </div>
+                  </div>
+                  <!--[if (mso)|(IE)]></td><![endif]-->
+                  <!--[if (mso)|(IE)]></tr></table></td></tr></table><![endif]-->
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="u-row-container"
+              style="padding: 0px; background-color: transparent"
+            >
+              <div
+                class="u-row"
+                style="
+                  margin: 0 auto;
+                  min-width: 320px;
+                  max-width: 600px;
+                  overflow-wrap: break-word;
+                  word-wrap: break-word;
+                  word-break: break-word;
+                  background-color: #eb4747;
+                "
+              >
+                <div
+                  style="
+                    border-collapse: collapse;
+                    display: table;
+                    width: 100%;
+                    height: 100%;
+                    background-color: transparent;
+                  "
+                >
+                  <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #eb4747;"><![endif]-->
+
+                  <!--[if (mso)|(IE)]><td align="center" width="600" style="width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
+                  <div
+                    class="u-col u-col-100"
+                    style="
+                      max-width: 320px;
+                      min-width: 600px;
+                      display: table-cell;
+                      vertical-align: top;
+                    "
+                  >
+                    <div style="height: 100%; width: 100% !important">
+                      <!--[if (!mso)&(!IE)]><!-->
+                      <div
+                        style="
+                          box-sizing: border-box;
+                          height: 100%;
+                          padding: 0px;
+                          border-top: 0px solid transparent;
+                          border-left: 0px solid transparent;
+                          border-right: 0px solid transparent;
+                          border-bottom: 0px solid transparent;
+                        "
+                      >
+                        <!--<![endif]-->
+
+                        <table
+                          style="font-family: 'Cabin', sans-serif"
+                          role="presentation"
+                          cellpadding="0"
+                          cellspacing="0"
+                          width="100%"
+                          border="0"
+                        >
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  overflow-wrap: break-word;
+                                  word-break: break-word;
+                                  padding: 10px;
+                                  font-family: 'Cabin', sans-serif;
+                                "
+                                align="left"
+                              >
+                                <div
+                                  style="
+                                    color: #ffffff;
+                                    line-height: 180%;
+                                    text-align: center;
+                                    word-wrap: break-word;
+                                  "
+                                >
+                                  <p style="font-size: 14px; line-height: 180%">
+                                    <span
+                                      style="
+                                        font-size: 16px;
+                                        line-height: 28.8px;
+                                      "
+                                      >©️ Copyrights Girok - All Rights
+                                      Reserved</span
+                                    >
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <!--[if (!mso)&(!IE)]><!-->
+                      </div>
+                      <!--<![endif]-->
+                    </div>
+                  </div>
+                  <!--[if (mso)|(IE)]></td><![endif]-->
+                  <!--[if (mso)|(IE)]></tr></table></td></tr></table><![endif]-->
+                </div>
+              </div>
+            </div>
+
+            <!--[if (mso)|(IE)]></td></tr></table><![endif]-->
+          </td>
         </tr>
-        </table>
-        <![endif]-->
-        </td>
-      </tr>
+      </tbody>
     </table>
-    <!-- end body -->
-
-
-    <script>
-      function myFunction() {
-        var copyText = document.getElementById("verificationCode");
-        console.log(copyText.innerText)
-
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(copyText.value);
-
-        var tooltip = document.getElementById("myTooltip");
-        tooltip.innerHTML = "Copied: " + copyText.value;
-      }
-
-      function outFunc() {
-        var tooltip = document.getElementById("myTooltip");
-        tooltip.innerHTML = "Copy to clipboard";
-      }
-    </script>
+    <!--[if mso]></div><![endif]-->
+    <!--[if IE]></div><![endif]-->
   </body>
 </html>
