@@ -16,6 +16,7 @@ import server.src.auth.utils as utils
 import server.src.auth.models as models
 import server.src.dependencies as glob_dependencies
 import server.src.utils as glob_utils
+import server.src.email.utils as email_utils
 import server.src.user.models as user_models
 import server.src.user.schemas as user_schemas
 from server.src.auth.config import get_jwt_settings
@@ -53,7 +54,7 @@ async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, 
         replacements={"__VERIFICATION_CODE__": verification_code},
         html_path="server/src/email/verification.html"
     )
-    background_tasks.add_task(glob_utils.send_email, recipient, content, subject)
+    background_tasks.add_task(email_utils.send_transac_email, recipient, content, subject)
     
     # Hash verification code
     hashed_verification_code = utils.hash_verification_code(verification_code)
@@ -69,7 +70,6 @@ async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, 
     db.refresh(new_user)
     
     return new_user
-
 
 
 @router.post("/register/verification_code", status_code=status.HTTP_200_OK)

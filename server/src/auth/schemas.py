@@ -13,6 +13,11 @@ import server.src.user.schemas as user_schemas
 
 class UserCreate(user_schemas.UserBase):
     password: str = Field(default=..., min_length=4, max_length=30)
+    @validator("password")
+    def password_must_be_valid(cls, v):
+        if len(v) > 30 or len(v) < 6:
+            raise exceptions.InvalidPasswordLengthException()
+        return v
     
 
 class UserCreateOut(user_schemas.UserBase):
@@ -24,7 +29,12 @@ class UserCreateOut(user_schemas.UserBase):
 
 class VerificationCode(BaseModel):
     email: str
-    verification_code: str = Field(default=..., max_length=6)
+    verification_code: str = Field(default=...)
+    @validator("verification_code")
+    def verification_code_must_be_valid(cls, v):
+        if len(v) != 6:
+            raise exceptions.InvalidVerificationCode()
+        return v
     
 
 class VerifyEmail(BaseModel):

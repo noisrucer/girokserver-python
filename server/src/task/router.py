@@ -141,7 +141,7 @@ async def delete_task(
     
 @router.patch(
     '/{task_id}/tag',
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
 )
 async def change_task_tag(
     task_id: int,
@@ -152,12 +152,13 @@ async def change_task_tag(
     user_id = current_user.user_id
     tag = tag.dict()
     new_tag_name = tag['new_tag_name']
-    service.change_task_tag(db, user_id, task_id, new_tag_name)
+    updated_task = service.change_task_tag(db, user_id, task_id, new_tag_name)
+    return updated_task 
 
 
 @router.patch(
     '/{task_id}/priority',
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
 )
 async def change_task_priority(
     task_id: int,
@@ -168,12 +169,13 @@ async def change_task_priority(
     user_id = current_user.user_id
     priority = priority.dict()
     new_priority = priority['new_priority']
-    service.change_task_priority(db, user_id, task_id, new_priority)
+    updated_task = service.change_task_priority(db, user_id, task_id, new_priority)
+    return updated_task
 
 
 @router.patch(
     '/{task_id}/date',
-    status_code=status.HTTP_204_NO_CONTENT
+    status_code=status.HTTP_200_OK
 )
 async def change_task_date(
     task_id: int,
@@ -184,7 +186,25 @@ async def change_task_date(
     user_id = current_user.user_id
     data = data.dict()
     new_date = data['new_date']
-    service.change_task_date(db, user_id, task_id, new_date)
+    updated_task = service.change_task_date(db, user_id, task_id, new_date)
+    return updated_task
+
+
+@router.patch(
+    '/{task_id}/name',
+    status_code=status.HTTP_200_OK
+)
+async def change_task_name(
+    task_id: int,
+    data: schemas.ChangeTaskNameIn,
+    db: Session=Depends(get_db),
+    current_user: user_models.User = Depends(glob_dependencies.get_current_user) 
+):
+    user_id = current_user.user_id
+    data = data.dict()
+    new_name = data['new_name']
+    updated_task = service.change_task_name(db, user_id, task_id, new_name)
+    return updated_task
 
 
 @router.get(

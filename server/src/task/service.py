@@ -208,6 +208,7 @@ def change_task_tag(db: Session, user_id: int, task_id: int, new_tag_name: str):
 
     setattr(task, "tag", new_tag_name)
     db.commit()
+    return general_utils.sql_obj_to_dict(task)
     
 
 
@@ -225,6 +226,7 @@ def change_task_priority(db: Session, user_id: int, task_id: int, new_priority: 
 
     setattr(task, "priority", new_priority)
     db.commit()
+    return general_utils.sql_obj_to_dict(task)
 
     
 def change_task_date(db: Session, user_id: int, task_id: int, new_date: str):
@@ -241,3 +243,21 @@ def change_task_date(db: Session, user_id: int, task_id: int, new_date: str):
 
     setattr(task, "deadline", new_date)
     db.commit()
+    return general_utils.sql_obj_to_dict(task)
+
+
+def change_task_name(db: Session, user_id: int, task_id: int, new_name: str):
+    task = db.query(models.Task).\
+        filter(
+            and_(
+                models.Task.user_id == user_id,
+                models.Task.task_id == task_id
+            )
+        ).first()
+        
+    if not task:
+        raise exceptions.TaskNotFoundException(task_id=task_id)
+
+    setattr(task, "name", new_name)
+    db.commit()
+    return general_utils.sql_obj_to_dict(task)
