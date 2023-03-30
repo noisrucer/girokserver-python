@@ -1,6 +1,5 @@
 from fastapi import HTTPException, status
 
-
 class EmailNotValidException(HTTPException):
     def __init__(self):
         self.status_code = status.HTTP_400_BAD_REQUEST
@@ -29,7 +28,13 @@ class InvalidEmailOrPasswordException(HTTPException):
 class EmailNotValidatedException(HTTPException):
     def __init__(self):
         self.status_code = status.HTTP_401_UNAUTHORIZED
-        self.detail = "Please validate your email account first"
+        self.detail = "Please register again to validate your email."
+
+        
+class InvalidPasswordLengthException(HTTPException):
+    def __init__(self):
+        self.status_code = status.HTTP_400_BAD_REQUEST
+        self.detail = "Please provide password in 6 ~ 30 characters."
         
         
 class InvalidVerificationCode(HTTPException):
