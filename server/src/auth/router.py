@@ -63,7 +63,18 @@ async def register(user: schemas.UserCreate, background_tasks: BackgroundTasks, 
     # Hash password
     hashed_password = utils.hash_password(user_dict['password'])
     user_dict.update(password=hashed_password)
-    
+
+    if service.get_current_active_user(db ,email=user_dict['email'], is_activate=False):
+        update_user = db.query(user_models.User).filter(user_models.User.email==user_dict['email']).first()
+        update_user.password = hashed_password
+        update_user.verification_code = hashed_verification_code
+        
+        db.add(update_user)
+        db.commit()
+        db.refresh(update_user)
+        
+        return update_user
+  
     new_user = user_models.User(**user_dict)
     db.add(new_user) 
     db.commit()
