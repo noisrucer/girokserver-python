@@ -1,1 +1,0 @@
-from server.src.email.email import email_sender
