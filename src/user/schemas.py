@@ -1,26 +1,22 @@
-from email_validator import validate_email, EmailNotValidError
-from pydantic import BaseModel, Field, EmailStr, validator
-from typing import Union
+from email_validator import EmailNotValidError, validate_email
+from pydantic import BaseModel, validator
 
-import src.user.enums as enums
-import src.utils as glob_utils
 import src.auth.exceptions as auth_exceptions
+
 
 class UserBase(BaseModel):
     email: str
 
-    @validator('email')
+    @validator("email")
     def email_must_be_valid(cls, v):
         try:
             validation = validate_email(v)
             email = validation.email
-        except EmailNotValidError as e:
+        except EmailNotValidError:
             raise auth_exceptions.EmailNotValidException()
         return email
+
 
 class User(UserBase):
     class Config:
         orm_mode = True
-        
-
-    
