@@ -1,7 +1,7 @@
 import datetime
 from collections import Counter
-from typing import List
-from src.email import email_sender
+
+from src.email.email import email_sender
 
 
 def send_email(recipients, content, subject):
@@ -13,7 +13,7 @@ def get_current_year():
     return now.year
 
 
-def extract_sub_dict(dct: dict, included_keys: List[str]):
+def extract_sub_dict(dct: dict, included_keys: list[str]):
     return {k: v for k, v in dct.items() if k in included_keys}
 
 
@@ -27,7 +27,7 @@ def capitalize_variable(var_name: str):
     :return: capitalized name
     """
 
-    return ''.join([str(_).capitalize() for _ in var_name.split('_')])
+    return "".join([str(_).capitalize() for _ in var_name.split("_")])
 
 
 def count_enum(values, enumTy, asec=False):
@@ -37,7 +37,7 @@ def count_enum(values, enumTy, asec=False):
     :param enumTy: enum type
     :return: { enum key: count }
     """
-        
+
     return {k.value: 0 for k in enumTy} | Counter(values)
 
 
@@ -56,9 +56,3 @@ def sql_obj_list_to_dict_list(sql_obj_list):
 
 def sql_obj_to_dict(sql_obj):
     return {col.name: getattr(sql_obj, col.name) for col in sql_obj.__table__.columns}
-
-
-
-        
-    
-        

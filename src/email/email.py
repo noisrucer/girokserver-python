@@ -1,10 +1,11 @@
 import smtplib
-
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
 from src.email.config import get_email_settings
 
 settings = get_email_settings()
+
 
 class EmailSender:
     def __init__(self, email, app_password):
@@ -33,10 +34,8 @@ class EmailSender:
             print("Error message: ", e)
 
     def __del__(self):
-
         self.smtp.quit()
         pass
 
 
-email_sender = EmailSender(
-    settings.GMAIL_SENDER, settings.GMAIL_APP_PASSWORD)
+email_sender = EmailSender(settings.GMAIL_SENDER, settings.GMAIL_APP_PASSWORD)

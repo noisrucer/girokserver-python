@@ -1,14 +1,13 @@
 from fastapi import Depends
-from sqlalchemy.orm import Session 
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, ExpiredSignatureError
+from jose import JWTError
+from sqlalchemy.orm import Session
 
-from src.database import get_db
-import src.auth.service as service
 import src.auth.exceptions as exceptions
 import src.auth.schemas as schemas
+import src.auth.service as service
 import src.auth.utils as utils
-
+from src.database import get_db
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/login",
@@ -16,10 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 
-async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-    ):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
         user_email = utils.decode_access_jwt(token)
         if user_email is None:

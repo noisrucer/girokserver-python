@@ -1,14 +1,14 @@
-from typing import Union, List
 import datetime
 from collections import defaultdict
 
-from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
+from sqlalchemy.orm import Session
 
-import src.task.models as models
-import src.task.exceptions as exceptions
 import src.category.service as category_service
+import src.task.exceptions as exceptions
+import src.task.models as models
 import src.utils as general_utils
+
 
 def create_task(db: Session, task_data):
     new_task = models.Task(**task_data)
@@ -19,17 +19,11 @@ def create_task(db: Session, task_data):
 
 
 def get_single_task(db: Session, user_id: int, task_id: int):
-    task = db.query(models.Task).\
-        filter(
-            and_(
-                models.Task.user_id == user_id,
-                models.Task.task_id == task_id
-            )
-        ).first()
-    
+    task = db.query(models.Task).filter(and_(models.Task.user_id == user_id, models.Task.task_id == task_id)).first()
+
     if not task:
         raise exceptions.TaskNotFoundException(task_id=task_id)
-    
+
     task = general_utils.sql_obj_to_dict(task)
     return task
 
@@ -37,11 +31,11 @@ def get_single_task(db: Session, user_id: int, task_id: int):
 def get_tasks_by_category(
     db: Session,
     user_id: int,
-    cat_ids: List[int],
+    cat_ids: list[int],
     start_date: datetime,
     end_date: datetime,
     tag: str,
-    priority: Union[int, None] = None,
+    priority: int | None = None,
     no_priority: bool = False,
 ):
     tasks = defaultdict(dict)
@@ -55,7 +49,7 @@ def get_tasks_by_category(
             end_date=end_date,
             priority=priority,
             no_priority=no_priority,
-            tag=tag
+            tag=tag,
         )
         if cat_id is not None:
             sub_cat_ids = category_service.get_subcategory_ids_by_parent_id(db, user_id, cat_id)
@@ -70,21 +64,21 @@ def get_tasks_by_category(
             end_date=end_date,
             priority=priority,
             no_priority=no_priority,
-            tag=tag
+            tag=tag,
         )
-    
+
     return tasks
-     
+
 
 def get_tasks_as_list(
     db: Session,
     user_id: int,
-    cat_ids: Union[List[int], None],
+    cat_ids: list[int] | None,
     start_date: datetime,
     end_date: datetime,
     tag: str,
-    priority: Union[int, None] = None,
-    no_priority: bool = False
+    priority: int | None = None,
+    no_priority: bool = False,
 ):
     if not cat_ids:
         return []
@@ -98,7 +92,7 @@ def get_tasks_as_list(
             end_date=end_date,
             tag=tag,
             priority=priority,
-            no_priority=no_priority
+            no_priority=no_priority,
         )
         tasks += cat_tasks
         if cat_id is not None:
@@ -113,21 +107,15 @@ def get_tasks_as_list(
             end_date=end_date,
             tag=tag,
             priority=priority,
-            no_priority=no_priority
+            no_priority=no_priority,
         )
-    
+
     return tasks
-    
+
 
 def get_tags(db: Session, user_id: int):
-    tags = db.query(models.Task.tag).\
-        filter(
-            and_(
-                models.Task.user_id == user_id,
-                models.Task.tag != None
-            )    
-        ).all()
-    tags = {tag[0] for tag in tags} # unique tags
+    tags = db.query(models.Task.tag).filter(and_(models.Task.user_id == user_id, models.Task.tag is not None)).all()
+    tags = {tag[0] for tag in tags}  # unique tags
     return list(tags)
 
 
@@ -138,89 +126,73 @@ def get_direct_tasks_of_category(
     start_date: datetime,
     end_date: datetime,
     tag: str,
-    priority: Union[int, None] = None,
-    no_priority: bool = False
-    ):
+    priority: int | None = None,
+    no_priority: bool = False,
+):
     cat_color = None
     if cat_id:
         root_id = category_service.get_root_category_id(db, user_id, cat_id)
         cat_color = category_service.get_category_color_by_id(db, user_id, root_id)
-        
-    tasks_query = db.query(models.Task).\
-        filter(
-            and_(
-                models.Task.user_id == user_id,
-                models.Task.task_category_id == cat_id,
-                func.date(models.Task.deadline) >= start_date,
-                func.date(models.Task.deadline) <= end_date
-            )
+
+    tasks_query = db.query(models.Task).filter(
+        and_(
+            models.Task.user_id == user_id,
+            models.Task.task_category_id == cat_id,
+            func.date(models.Task.deadline) >= start_date,
+            func.date(models.Task.deadline) <= end_date,
         )
-        
+    )
+
     if no_priority:
-        tasks_query = tasks_query.filter(models.Task.priority == None)
+        tasks_query = tasks_query.filter(models.Task.priority is None)
     else:
         if priority:
             tasks_query = tasks_query.filter(models.Task.priority == priority)
-    
+
     if tag:
         tasks_query = tasks_query.filter(models.Task.tag == tag)
-    
+
     tasks = tasks_query.order_by(models.Task.deadline.asc()).order_by(models.Task.priority.desc()).all()
     tasks_obj_list = general_utils.sql_obj_list_to_dict_list(tasks)
     for task_obj in tasks_obj_list:
-        task_obj.update({
-            "task_category_full_path": category_service.get_category_full_path_by_id(db, user_id, task_obj['task_category_id']),
-        })
-        
+        task_obj.update(
+            {
+                "task_category_full_path": category_service.get_category_full_path_by_id(
+                    db, user_id, task_obj["task_category_id"]
+                ),
+            }
+        )
+
         if cat_color:
             task_obj.update({"color": cat_color})
 
     return tasks_obj_list
-    
-    
+
+
 def delete_task(db: Session, user_id: int, task_id: int):
-    task = db.query(models.Task).\
-        filter(
-            and_(
-                models.Task.user_id == user_id,
-                models.Task.task_id == task_id
-            )
-        ).first()
+    task = db.query(models.Task).filter(and_(models.Task.user_id == user_id, models.Task.task_id == task_id)).first()
     if not task:
         raise exceptions.TaskNotFoundException(task_id=task_id)
-        
+
     db.delete(task)
     db.commit()
     return task
 
 
 def change_task_tag(db: Session, user_id: int, task_id: int, new_tag_name: str):
-    task = db.query(models.Task).\
-        filter(
-            and_(
-                models.Task.user_id == user_id,
-                models.Task.task_id == task_id
-            )
-        ).first()
-        
+    task = db.query(models.Task).filter(and_(models.Task.user_id == user_id, models.Task.task_id == task_id)).first()
+
     if not task:
         raise exceptions.TaskNotFoundException(task_id=task_id)
 
     setattr(task, "tag", new_tag_name)
     db.commit()
     return general_utils.sql_obj_to_dict(task)
-    
 
 
 def change_task_priority(db: Session, user_id: int, task_id: int, new_priority: int):
-    task = db.query(models.Task).\
-        filter(
-            and_(
-                models.Task.user_id == user_id,
-                models.Task.task_id == task_id
-            )
-        ).first()
-        
+    task = db.query(models.Task).filter(and_(models.Task.user_id == user_id, models.Task.task_id == task_id)).first()
+
     if not task:
         raise exceptions.TaskNotFoundException(task_id=task_id)
 
@@ -228,16 +200,10 @@ def change_task_priority(db: Session, user_id: int, task_id: int, new_priority: 
     db.commit()
     return general_utils.sql_obj_to_dict(task)
 
-    
+
 def change_task_date(db: Session, user_id: int, task_id: int, new_date: str):
-    task = db.query(models.Task).\
-        filter(
-            and_(
-                models.Task.user_id == user_id,
-                models.Task.task_id == task_id
-            )
-        ).first()
-        
+    task = db.query(models.Task).filter(and_(models.Task.user_id == user_id, models.Task.task_id == task_id)).first()
+
     if not task:
         raise exceptions.TaskNotFoundException(task_id=task_id)
 
@@ -247,14 +213,8 @@ def change_task_date(db: Session, user_id: int, task_id: int, new_date: str):
 
 
 def change_task_name(db: Session, user_id: int, task_id: int, new_name: str):
-    task = db.query(models.Task).\
-        filter(
-            and_(
-                models.Task.user_id == user_id,
-                models.Task.task_id == task_id
-            )
-        ).first()
-        
+    task = db.query(models.Task).filter(and_(models.Task.user_id == user_id, models.Task.task_id == task_id)).first()
+
     if not task:
         raise exceptions.TaskNotFoundException(task_id=task_id)
 

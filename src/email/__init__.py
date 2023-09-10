@@ -1,1 +1,0 @@
-from src.email.email import email_sender
