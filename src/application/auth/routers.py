@@ -3,10 +3,12 @@ from fastapi import APIRouter, Depends, status
 from src.application.auth.dtos import (
     LoginRequest,
     LoginResponse,
+    RefreshTokenResponse,
     RegisterRequest,
     RegisterResponse,
     VerifyEmailRequest,
 )
+from src.dependencies.auth_dependencies import get_current_user_id, get_token
 from src.dependencies.user_dependencies import get_user_service
 from src.domain.user.services import UserService
 
@@ -28,5 +30,16 @@ def verify_email(request: VerifyEmailRequest, user_service: UserService = Depend
 def login(request: LoginRequest, user_service: UserService = Depends(get_user_service)):
     login_service_response = user_service.login_user(email=request.email, password=request.password)
     access_token = login_service_response.access_token
-    token_type = login_service_response.token_type
-    return LoginResponse(access_token=access_token, token_type=token_type)
+    refresh_token = login_service_response.refresh_token
+    return LoginResponse(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.get("/refresh_token", status_code=status.HTTP_200_OK, response_model=RefreshTokenResponse)
+def refresh_token(token: str = Depends(get_token), user_service: UserService = Depends(get_user_service)):
+    access_token = user_service.refresh_token(refresh_token=token)
+    return RefreshTokenResponse(access_token=access_token)
+
+
+@router.post("/protected")
+def protect(current_user_id: str = Depends(get_current_user_id)):
+    return {"current_user_id": current_user_id}

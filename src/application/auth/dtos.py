@@ -62,5 +62,8 @@ class LoginRequest(BaseModel):  # TODO: Remove redundancy -> Use EmailBaseModel
 
 class LoginResponse(BaseModel):
     access_token: str = Field(default=...)
-    token_type: str = Field(default="bearer")
-    # refresh_token: str = Field(default=...)
+    refresh_token: str = Field(default=...)
+
+
+class RefreshTokenResponse(BaseModel):
+    access_token: str = Field(default=...)

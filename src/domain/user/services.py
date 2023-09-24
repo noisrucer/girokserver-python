@@ -13,8 +13,7 @@ from src.domain.exceptions.auth_exceptions import (
 from src.domain.user.dtos import LoginUserServiceResponse
 from src.domain.user.entities import UserEntity
 from src.domain.user.utils import generate_verification_code
-from src.infrastructure.auth.crypto_utils import hash_data, verify_data
-from src.infrastructure.auth.jwt_utils import create_jwt_access_token
+from src.infrastructure.auth.auth_handler import AuthHandler
 from src.infrastructure.external_services.email_service.email_sender import EmailSender
 from src.infrastructure.external_services.email_service.utils import (
     read_and_format_html,
@@ -23,9 +22,10 @@ from src.persistence.user.repositories import UserRepository
 
 
 class UserService:
-    def __init__(self, user_repository: UserRepository, email_sender: EmailSender):
+    def __init__(self, user_repository: UserRepository, email_sender: EmailSender, auth_handler: AuthHandler):
         self.user_repository = user_repository
         self.email_sender = email_sender
+        self.auth_handler = auth_handler
 
     async def register_user(self, email: str, password: str) -> UserEntity:
         # Check duplicated email
@@ -37,7 +37,7 @@ class UserService:
                 self.user_repository.delete_user_by_id(user_id=existing_user.user_id)
 
         # Create a new unverified user
-        hashed_password = hash_data(raw=password)
+        hashed_password = self.auth_handler.hash_data(raw=password)
         user_entity = UserEntity(email=email, hashed_password=hashed_password, is_verified=False)
         new_user_entity = self.user_repository.create_user(user_entity=user_entity)
 
@@ -89,8 +89,13 @@ class UserService:
             raise UserNotVerifiedError(email=email)
 
         stored_hashed_password = user_entity.hashed_password
-        if not verify_data(raw=password, hashed=stored_hashed_password):
+        if not self.auth_handler.verify_data(raw=password, hashed=stored_hashed_password):
             raise InvalidPasswordError()
 
-        access_token = create_jwt_access_token(data={"sub": user_entity.user_id})
-        return LoginUserServiceResponse(access_token=access_token, token_type="bearer")
+        access_token = self.auth_handler.create_access_token(sub=user_entity.user_id)
+        refresh_token = self.auth_handler.create_refresh_token(sub=user_entity.user_id)
+        return LoginUserServiceResponse(access_token=access_token, refresh_token=refresh_token)
+
+    def refresh_token(self, refresh_token: str) -> str:
+        access_token = self.auth_handler.refresh_token(refresh_token=refresh_token)
+        return access_token
