@@ -3,14 +3,18 @@ from datetime import datetime
 
 from src.domain.exceptions.auth_exceptions import (
     DuplicatedEmailError,
+    InvalidPasswordError,
     InvalidVerificationCodeError,
     UserAlreadyVerifiedError,
     UserNotFoundError,
+    UserNotVerifiedError,
     VerificationCodeExpiredError,
 )
+from src.domain.user.dtos import LoginUserServiceResponse
 from src.domain.user.entities import UserEntity
 from src.domain.user.utils import generate_verification_code
-from src.infrastructure.auth.crypto_utils import hash_data
+from src.infrastructure.auth.crypto_utils import hash_data, verify_data
+from src.infrastructure.auth.jwt_utils import create_jwt_access_token
 from src.infrastructure.external_services.email_service.email_sender import EmailSender
 from src.infrastructure.external_services.email_service.utils import (
     read_and_format_html,
@@ -75,3 +79,18 @@ class UserService:
         # Update user to verified
         user_entity.verify()
         self.user_repository.update_user(user_entity=user_entity, update_fields=["is_verified"])
+
+    def login_user(self, email: str, password: str) -> LoginUserServiceResponse:
+        user_entity = self.user_repository.get_user_by_email(email=email)
+
+        if not user_entity:
+            raise UserNotFoundError(email=email)
+        if not user_entity.is_verified:
+            raise UserNotVerifiedError(email=email)
+
+        stored_hashed_password = user_entity.hashed_password
+        if not verify_data(raw=password, hashed=stored_hashed_password):
+            raise InvalidPasswordError()
+
+        access_token = create_jwt_access_token(data={"sub": user_entity.user_id})
+        return LoginUserServiceResponse(access_token=access_token, token_type="bearer")

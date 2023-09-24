@@ -46,7 +46,6 @@ class UserRepository:
         email_verification_model = (
             self.session.query(EmailVerification).filter(EmailVerification.user_id == user_id).first()
         )
-        print(type(email_verification_model.verification_code))
         if not email_verification_model:
             return None
         return EmailVerificationEntity(

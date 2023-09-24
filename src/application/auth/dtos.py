@@ -44,3 +44,23 @@ class VerifyEmailRequest(BaseModel):
         except EmailNotValidError:
             raise InvalidEmailError(email=v)
         return email
+
+
+class LoginRequest(BaseModel):  # TODO: Remove redundancy -> Use EmailBaseModel
+    email: str = Field(default=...)
+    password: str = Field(default=...)
+
+    @validator("email")
+    def email_must_be_valid(cls, v):
+        try:
+            validation = validate_email(v)
+            email = validation.email
+        except EmailNotValidError:
+            raise InvalidEmailError(email=v)
+        return email
+
+
+class LoginResponse(BaseModel):
+    access_token: str = Field(default=...)
+    token_type: str = Field(default="bearer")
+    # refresh_token: str = Field(default=...)
