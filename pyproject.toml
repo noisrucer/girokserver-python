@@ -21,8 +21,6 @@ python-jose = "3.3.0"
 python-multipart = "0.0.5"
 python-slugify = "5.0.2"
 requests = "2.26.0"
-sqlalchemy-imageattach = "1.1.0"
-sqlalchemy = "1.4.43"
 passlib = "1.7.4"
 python-dateutil = "2.8.2"
 uvicorn = {extras = ["standard"], version = "^0.23.2"}
@@ -32,6 +30,7 @@ pydantic = "^2.3.0"
 aiohttp = "^3.8.5"
 aiodns = "^3.0.0"
 pyjwt = "^2.8.0"
+sqlalchemy = "^2.0.21"
 
 
 [tool.poetry.group.dev.dependencies]
