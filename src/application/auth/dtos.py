@@ -8,8 +8,8 @@ from src.application.exceptions.auth_exceptions import (
 
 
 class RegisterRequest(BaseModel):
-    email: str = Field(default=...)
-    password: str = Field(default=..., min_length=6, max_length=30)  # TODO: Add regex for password validation
+    email: str = Field(default=..., description="Dummy", examples=["jason@gmail.com"])
+    password: str = Field(default=..., examples=["Aksdf123*"])  # TODO: Add regex for password validation
 
     @validator("email")
     def email_must_not_valid(cls, v):
@@ -28,8 +28,8 @@ class RegisterRequest(BaseModel):
 
 
 class RegisterResponse(BaseModel):
-    user_id: int = Field(default=...)
-    email: str = Field(default=...)
+    user_id: int = Field(default=..., examples=[1])
+    email: str = Field(default=..., examples=["jason@gmail.com"])
 
 
 class VerifyEmailRequest(BaseModel):
