@@ -34,7 +34,14 @@ class Config:
 
 
 def load_config() -> Config:
-    load_dotenv()
+    app_env = os.getenv("APP_ENV", "local")
+    if app_env == "development":
+        load_dotenv(dotenv_path=".env.development")
+    elif app_env == "production":
+        load_dotenv(dotenv_path=".env.production")
+    elif app_env == "local":
+        load_dotenv(dotenv_path=".env.local")
+
     return Config(
         db=DBConfig(
             MYSQL_HOST=os.environ["MYSQL_HOST"],

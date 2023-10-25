@@ -9,7 +9,7 @@ ENV POETRY_VERSION=1.5.0 \
     POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
     POETRY_VIRTUALENVS_CREATE=true \
-    PATH="$POETRY_HOME/bin:$PATH"
+    PATH="$POETRY_HOME/bin:/app/.venv/bin:$PATH"
 
 RUN curl -sSL https://install.python-poetry.org | python3 - \
     && ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
