@@ -1,29 +1,9 @@
-import enum
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String
 
 from src.infrastructure.database.connection import Base
-
-
-class Priority(enum.Enum):
-    low = 1
-    medium = 2
-    high = 3
-
-
-# TODO: Boolean으로 바꾸는게 나을듯함.
-class Status(enum.Enum):
-    not_started = 1
-    in_progress = 2
-    done = 3
-
-
-class RecurrenceType(enum.Enum):
-    daily = 1
-    weekly = 2
-    monthly = 3
-    yearly = 4
+from src.shared.constants import Priority, RecurrenceType
 
 
 class Event(Base):
@@ -37,7 +17,7 @@ class Event(Base):
     name = Column(String(300), nullable=False)
     priority = Column(Enum(Priority), nullable=True)
     tag = Column(String(20), nullable=True)
-    status = Column(Enum(Status), nullable=True)
+    is_completed = Column(Boolean, nullable=False, default=False)
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=True)  # if provided, it's a one-time event spanning multiple days
     is_recurring = Column(Boolean, nullable=False)

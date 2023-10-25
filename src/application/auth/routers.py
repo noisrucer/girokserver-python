@@ -3,12 +3,13 @@ from fastapi import APIRouter, Depends, status
 from src.application.auth.dtos import (
     LoginRequest,
     LoginResponse,
+    RefreshTokenRequest,
     RefreshTokenResponse,
     RegisterRequest,
     RegisterResponse,
     VerifyEmailRequest,
 )
-from src.dependencies.auth_dependencies import get_current_user_id, get_token
+from src.dependencies.auth_dependencies import get_current_user_id
 from src.dependencies.user_dependencies import get_user_service
 from src.domain.user.services import UserService
 
@@ -34,9 +35,9 @@ def login(request: LoginRequest, user_service: UserService = Depends(get_user_se
     return LoginResponse(access_token=access_token, refresh_token=refresh_token)
 
 
-@router.get("/refresh_token", status_code=status.HTTP_200_OK, response_model=RefreshTokenResponse)
-def refresh_token(token: str = Depends(get_token), user_service: UserService = Depends(get_user_service)):
-    access_token = user_service.refresh_token(refresh_token=token)
+@router.post("/refresh_token", status_code=status.HTTP_200_OK, response_model=RefreshTokenResponse)
+def refresh_token(request: RefreshTokenRequest, user_service: UserService = Depends(get_user_service)):
+    access_token = user_service.refresh_token(refresh_token=request.refresh_token)
     return RefreshTokenResponse(access_token=access_token)
 
 
