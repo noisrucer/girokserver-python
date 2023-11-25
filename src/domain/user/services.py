@@ -94,7 +94,12 @@ class UserService:
 
         access_token = self.auth_handler.create_access_token(sub=user_entity.user_id)
         refresh_token = self.auth_handler.create_refresh_token(sub=user_entity.user_id)
-        return LoginUserServiceResponse(access_token=access_token, refresh_token=refresh_token)
+        return LoginUserServiceResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            user_id=user_entity.user_id,
+            user_email=user_entity.email,
+        )
 
     def refresh_token(self, refresh_token: str) -> str:
         access_token = self.auth_handler.refresh_token(refresh_token=refresh_token)

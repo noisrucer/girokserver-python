@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from src.application.auth.dtos import (
+    CompactUserInfo,
     LoginRequest,
     LoginResponse,
     RefreshTokenRequest,
@@ -32,7 +33,14 @@ def login(request: LoginRequest, user_service: UserService = Depends(get_user_se
     login_service_response = user_service.login_user(email=request.email, password=request.password)
     access_token = login_service_response.access_token
     refresh_token = login_service_response.refresh_token
-    return LoginResponse(access_token=access_token, refresh_token=refresh_token)
+    return LoginResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        user_info=CompactUserInfo(
+            user_id=login_service_response.user_id,
+            email=login_service_response.user_email,
+        ),
+    )
 
 
 @router.post("/refresh_token", status_code=status.HTTP_200_OK, response_model=RefreshTokenResponse)
