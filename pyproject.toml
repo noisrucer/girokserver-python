@@ -5,9 +5,8 @@ description = "Girok Server"
 authors = ["Changjin Lee <changjin9792@gmail.com>"]
 readme = "README.md"
 packages = [
-  { include = "src"}
+  { include = "girok"}
 ]
-
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.104.1"

@@ -92,9 +92,15 @@ class LoginRequest(BaseModel):  # TODO: Remove redundancy -> Use EmailBaseModel
         return email
 
 
+class CompactUserInfo(BaseModel):
+    user_id: int = Field(default=...)
+    email: str = Field(default=...)
+
+
 class LoginResponse(BaseModel):
     access_token: str = Field(default=...)
     refresh_token: str = Field(default=...)
+    user_info: CompactUserInfo = Field(default=...)
 
 
 class RefreshTokenRequest(BaseModel):
