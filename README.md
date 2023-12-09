@@ -1,1 +1,3 @@
-# girok
+# girokserver
+
+Currently under refactoring
