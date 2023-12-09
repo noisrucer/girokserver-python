@@ -15,8 +15,11 @@ RUN curl -sSL https://install.python-poetry.org | python3 - \
     && ln -s $POETRY_HOME/bin/poetry /usr/local/bin/poetry
 
 COPY pyproject.toml poetry.lock /app/
-RUN poetry install --no-dev
 
 COPY ./src /app/src
+COPY ./README.md /app/README.md
+
+RUN poetry install --no-dev
+
 
 CMD ["uvicorn", "src.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]
