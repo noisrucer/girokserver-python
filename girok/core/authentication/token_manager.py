@@ -7,7 +7,8 @@ from jwt.exceptions import (
     InvalidTokenError,
 )
 
-from girok.core.exceptions.token import InvalidTokenError as CustomInvalidTokenError
+from girok.core.exceptions.emitter import raise_custom_exception
+from girok.domain.exceptions import DomainExceptions
 
 
 class TokenManager:
@@ -53,13 +54,13 @@ class TokenManager:
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             if payload["scope"] != expected_scope:
-                raise CustomInvalidTokenError("Invalid Token Scope")
+                raise_custom_exception(DomainExceptions.INVALID_TOKEN_SCOPE)
             sub = payload["sub"]
             assert isinstance(sub, str)
             return sub
         except ExpiredSignatureError:
-            raise CustomInvalidTokenError("Token has been expired.")
+            raise_custom_exception(DomainExceptions.TOKEN_EXPIRED)
         except InvalidSignatureError:
-            raise CustomInvalidTokenError("Invalid Token Signature.")
+            raise_custom_exception(DomainExceptions.INVALID_TOKEN_SIGNATURE)
         except InvalidTokenError:
-            raise CustomInvalidTokenError("Invalid Token.")
+            raise_custom_exception(DomainExceptions.INVALID_TOKEN)

@@ -15,7 +15,8 @@ from girok.core.db.session_maker import get_session_context
 from girok.core.email.email_manager import EmailManager
 from girok.core.middlewares.sqlalchemy import SQLAlchemyMiddleware
 from girok.domain.auth.container import AuthContainer
-from girok.domain.category.container import CategoryContainer
+
+# from girok.domain.category.container import CategoryContainer
 from girok.domain.user.container import UserContainer
 
 
@@ -75,6 +76,11 @@ class AppContainer(containers.DeclarativeContainer):
     )
 
     # Domain Containers
-    user_container = providers.Container(UserContainer, token_manager=token_manager, email_manager=email_manager)
-    auth_container = providers.Container(AuthContainer, token_manager=token_manager)
-    category_container = providers.Container(CategoryContainer)
+    user_container = providers.Container(UserContainer)
+    auth_container = providers.Container(
+        AuthContainer,
+        token_manager=token_manager,
+        email_manager=email_manager,
+        user_service=user_container.user_service,
+    )
+    # category_container = providers.Container(CategoryContainer)

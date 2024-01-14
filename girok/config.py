@@ -65,6 +65,6 @@ def load_config() -> RootConfig:
         db=db_config,
         jwt=jwt_config,
         mailgun=mailgun_config,
-        db_url=f"postgresql+asyncpg://{db_config.username}:{db_config.password}@{db_config.host}:5432/{db_config.db_name}",
+        db_url=f"mysql+aiomysql://{db_config.username}:{db_config.password}@{db_config.host}:3306/{db_config.db_name}",
     )
     return root_config

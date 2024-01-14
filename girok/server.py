@@ -5,9 +5,11 @@ from fastapi.responses import JSONResponse
 from girok.container import AppContainer
 from girok.core.db.session_maker import Base
 from girok.core.exceptions.base import BaseCustomException
-from girok.domain.auth.views import router as auth_router
-from girok.domain.category.views import router as category_router
-from girok.domain.user.views import router as user_router
+
+# from girok.domain.auth.views import router as auth_router
+# from girok.domain.category.views import router as category_router
+# from girok.domain.user.views import router as user_router
+from girok.domain.auth.application.auth_controller import router as auth_router
 
 
 def init_exception_handlers(app: FastAPI) -> None:
@@ -24,7 +26,7 @@ def init_exception_handlers(app: FastAPI) -> None:
     def handle_custom_exception(request: Request, exc: BaseCustomException) -> JSONResponse:
         return JSONResponse(
             status_code=exc.status_code,
-            content={"detail": exc.detail},
+            content={"error_code": exc.error_code, "detail": exc.detail},
         )
 
     @app.exception_handler(RequestValidationError)
@@ -41,9 +43,9 @@ def init_exception_handlers(app: FastAPI) -> None:
 
 
 def init_routers(app: FastAPI) -> None:
-    app.include_router(user_router, prefix="/api/v1")
+    # app.include_router(user_router, prefix="/api/v1")
     app.include_router(auth_router, prefix="/api/v1")
-    app.include_router(category_router, prefix="/api/v1")
+    # app.include_router(category_router, prefix="/api/v1")
 
 
 def create_app() -> FastAPI:

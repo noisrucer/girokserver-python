@@ -14,18 +14,20 @@ def extract_args() -> dict:
         choices=["dev", "local", "prod"],
         default="dev",
     )
+    argParser.add_argument("--host", type=str, help="Host for the server to run on", default="127.0.0.1")
+    argParser.add_argument("--port", type=int, help="Port for the server to run on", default=8080)
     args = argParser.parse_args()
-    return {"env": args.env}
+    return {"env": args.env, "host": args.host, "port": args.port}
 
 
-def main(env: str) -> None:
+def main(env: str, host: str, port: int) -> None:
     os.environ["ENV"] = env
     os.environ["ENV_FILE_PATH"] = f".env.{env}"
     print(f"- Running server in {env} environment...")
     uvicorn.run(
         app="girok.server:app",
-        host="127.0.0.1",
-        port=8080,
+        host=host,
+        port=port,
         log_level="info",
         reload=True if env == "dev" else False,
     )
@@ -34,4 +36,4 @@ def main(env: str) -> None:
 # Run `python -m girok` to start the server
 if __name__ == "__main__":
     args = extract_args()
-    main(env=args["env"])
+    main(env=args["env"], host=args["host"], port=args["port"])
