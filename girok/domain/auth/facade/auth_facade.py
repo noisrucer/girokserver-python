@@ -61,3 +61,30 @@ class AuthFacade:
 
     async def refresh_token(self, refresh_token: str) -> str:
         return self.token_manager.refresh_token(refresh_token=refresh_token)
+
+    async def send_reset_password_verification_code(self, email: str):
+        # Check if email is registered
+        is_user_registered = await self.user_service.is_user_registered_by_email(email=email)
+        if not is_user_registered:
+            raise_custom_exception(DomainExceptions.EMAIL_NOT_REGISTERED)
+
+        # Send email verification code
+        await self.auth_service.send_reset_password_email_verification_code(email=email)
+
+    async def verify_reset_password_email_verification_code(self, email: str, code: str) -> None:
+        # Check if email is already registered
+        is_user_registered = await self.user_service.is_user_registered_by_email(email=email)
+        if not is_user_registered:
+            raise_custom_exception(DomainExceptions.EMAIL_NOT_REGISTERED)
+        # Verify email verification code
+        await self.auth_service.verify_reset_password_verification_code(email=email, code=code)
+
+    async def reset_password(self, email: str, new_password: str, verification_code: str):
+        # 1. Check if the email is verified
+        await self.auth_service.check_reset_password_email_verified(email=email, verification_code=verification_code)
+
+        # 2. Reset password
+        await self.user_service.reset_password(email=email, new_password=new_password)
+
+        # 3. Delete reset password email verification
+        await self.auth_service.delete_reset_password_email_verification(email=email)

@@ -1,4 +1,5 @@
 from girok.core.exceptions.emitter import raise_custom_exception
+from girok.core.utils.auth import hash_password
 from girok.domain.exceptions import DomainExceptions
 from girok.domain.user.entity.user import User
 from girok.domain.user.repository.user_repository import UserRepository
@@ -26,3 +27,12 @@ class UserService:
 
         # Register user
         await self.user_repository.create(user=user)
+
+    async def reset_password(self, email: str, new_password: str) -> None:
+        # Hash password
+        user = await self.user_repository.get_or_none_by_email(email=email)
+        new_hashed_password = hash_password(raw_password=new_password)
+        user.password = new_hashed_password
+
+        # Update user
+        await self.user_repository.update_by_email(email=email, params={"password": new_hashed_password})

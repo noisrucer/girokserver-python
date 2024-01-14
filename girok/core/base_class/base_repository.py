@@ -40,7 +40,6 @@ class BaseSQLAlchemyRepository(Generic[ModelType]):
     @Transactional()
     async def update_by_id(self, id: int, params: dict) -> None:
         if hasattr(self.model, "id"):
-            print(id, params)
             query = update(self.model).where(self.model.id == id).values(**params)  # type: ignore
             await session.execute(query)
         else:

@@ -4,8 +4,14 @@ from girok.core.authentication.token_manager import TokenManager
 from girok.core.email.email_manager import EmailManager
 from girok.domain.auth.facade.auth_facade import AuthFacade
 from girok.domain.auth.model.email_verification import EmailVerification
+from girok.domain.auth.model.reset_password_email_verification import (
+    ResetPasswordEmailVerification,
+)
 from girok.domain.auth.repository.email_verification_repository import (
     EmailVerificationRepository,
+)
+from girok.domain.auth.repository.reset_password_email_verification_repository import (
+    ResetPasswordEmailVerificationRepository,
 )
 from girok.domain.auth.service.auth_service import AuthService
 from girok.domain.user.service.user_service import UserService
@@ -13,11 +19,15 @@ from girok.domain.user.service.user_service import UserService
 
 class AuthContainer(containers.DeclarativeContainer):
     email_verification_repository = providers.Factory(EmailVerificationRepository, model=EmailVerification)
+    reset_password_email_verification_repository = providers.Factory(
+        ResetPasswordEmailVerificationRepository, model=ResetPasswordEmailVerification
+    )
     token_manager: providers.Dependency[TokenManager] = providers.Dependency()
     email_manager: providers.Dependency[EmailManager] = providers.Dependency()
     auth_service = providers.Factory(
         AuthService,
         email_verification_repository=email_verification_repository,
+        reset_password_email_verification_repository=reset_password_email_verification_repository,
         token_manager=token_manager,
         email_manager=email_manager,
     )

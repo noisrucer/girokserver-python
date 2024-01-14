@@ -9,10 +9,17 @@ from girok.domain.auth.application.dtos.refresh_token import (
     RefreshTokenRequest,
     RefreshTokenResponse,
 )
+from girok.domain.auth.application.dtos.reset_password import ResetPasswordRequest
+from girok.domain.auth.application.dtos.send_reset_password_verification_code import (
+    SendResetPasswordEmailVerificationCodeRequest,
+)
 from girok.domain.auth.application.dtos.send_verification_code import (
     SendEmailVerificationCodeRequest,
 )
 from girok.domain.auth.application.dtos.signup import SignupRequest
+from girok.domain.auth.application.dtos.verify_reset_password_verification_code import (
+    VerifyResetPasswordVerificationCode,
+)
 from girok.domain.auth.application.dtos.verify_verification_code import (
     VerifyEmailVerificationCodeRequest,
 )
@@ -77,3 +84,32 @@ async def refresh_token(
 ):
     access_token = await auth_facade.refresh_token(refresh_token=request.refresh_token)
     return RefreshTokenResponse(access_token=access_token)
+
+
+@router.post("/auth/password-reset/code", status_code=status.HTTP_204_NO_CONTENT)
+@inject
+async def send_reset_password_verification_code(
+    request: SendResetPasswordEmailVerificationCodeRequest,
+    auth_facade: AuthFacade = Depends(Provide["auth_container.auth_facade"]),
+):
+    await auth_facade.send_reset_password_verification_code(email=request.email)
+
+
+@router.post("/auth/password-reset/verify-code", status_code=status.HTTP_204_NO_CONTENT)
+@inject
+async def verify_reset_password_verification_code(
+    request: VerifyResetPasswordVerificationCode,
+    auth_facade: AuthFacade = Depends(Provide["auth_container.auth_facade"]),
+):
+    await auth_facade.verify_reset_password_email_verification_code(email=request.email, code=request.verification_code)
+
+
+@router.patch("/reset-password", status_code=status.HTTP_201_CREATED)
+@inject
+async def reset_password(
+    request: ResetPasswordRequest,
+    auth_facade: AuthFacade = Depends(Provide["auth_container.auth_facade"]),
+):
+    await auth_facade.reset_password(
+        email=request.email, new_password=request.new_password, verification_code=request.verification_code
+    )

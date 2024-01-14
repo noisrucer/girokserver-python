@@ -1,5 +1,5 @@
 from dependency_injector.wiring import Provide
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import async_scoped_session
 
 from girok.core.base_class.base_repository import BaseSQLAlchemyRepository
@@ -27,3 +27,8 @@ class UserRepository(BaseSQLAlchemyRepository[UserModel]):
     async def create(self, user: User) -> None:
         user_model = map_user_entity_to_model(user)
         session.add(user_model)
+
+    @Transactional()
+    async def update_by_email(self, email: str, params: dict) -> None:
+        query = update(self.model).where(self.model.email == email).values(**params)
+        await session.execute(query)
